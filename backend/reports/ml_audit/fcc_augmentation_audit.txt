@@ -1,0 +1,46 @@
+TELECOMIQ FCC DATA AUGMENTATION & DE-DUPLICATED AUDIT REPORT
+======================================================================
+
+Raw Dataset Count: 2224
+Deduplicated Clean Dataset Count: 2204 (20 duplicate texts removed)
+
+UNTOUCHED SPLIT BREAKDOWN:
+• Training Set (70%): 1542 samples
+• Validation Set (15%): 331 samples
+• Test Set (15%): 331 samples (UNTOUCHED FINAL TEST SET)
+
+OVERALL COMPARISON ON UNTOUCHED TEST SET:
+• Baseline Test Accuracy:     89.12%
+• FCC Augmented Test Accuracy:87.92%
+• Baseline Weighted F1:       0.8903
+• FCC Augmented Weighted F1:  0.8600
+• Baseline Macro F1:          0.7300
+• FCC Augmented Macro F1:     0.4618
+
+PER-CLASS COMPARISON TABLE:
+             Category  Support Base Prec Base Rec Base F1 Aug Prec Aug Rec Aug F1
+      Billing Dispute       96      0.99     0.80    0.89     0.96    0.84   0.90
+Broadband Performance       38      0.90     0.97    0.94     0.90    0.97   0.94
+           Call Drops        4      0.67     1.00    0.80     0.00    0.00   0.00
+         Cancellation        3      0.75     1.00    0.86     0.00    0.00   0.00
+     Customer Service        9      0.89     0.89    0.89     1.00    0.89   0.94
+   Data / Usage Issue       35      0.94     0.97    0.96     0.94    0.97   0.96
+   Equipment / Router        1      0.50     1.00    0.67     0.00    0.00   0.00
+         Installation        3      1.00     0.33    0.50     0.00    0.00   0.00
+ Network Connectivity        1      0.00     0.00    0.00     0.00    0.00   0.00
+       Service Outage        9      0.54     0.78    0.64     0.75    0.33   0.46
+      Service Request      132      0.87     0.93    0.90     0.81    0.97   0.88
+
+FCC-AUGMENTED MODEL CONFUSION MATRIX:
+                       Billing Dispute  Broadband Performance  Call Drops  Cancellation  Customer Service  Data / Usage Issue  Equipment / Router  Installation  Network Connectivity  Service Outage  Service Request
+Billing Dispute                     81                      3           0             0                 0                   1                   0             0                     0               1               10
+Broadband Performance                0                     37           0             0                 0                   0                   0             0                     0               0                1
+Call Drops                           0                      0           0             0                 0                   0                   0             0                     0               0                4
+Cancellation                         0                      0           0             0                 0                   0                   0             0                     0               0                3
+Customer Service                     0                      0           0             0                 8                   0                   0             0                     0               0                1
+Data / Usage Issue                   0                      0           0             0                 0                  34                   0             0                     0               0                1
+Equipment / Router                   1                      0           0             0                 0                   0                   0             0                     0               0                0
+Installation                         0                      0           0             0                 0                   0                   0             0                     0               0                3
+Network Connectivity                 0                      0           0             0                 0                   0                   0             0                     0               0                1
+Service Outage                       0                      0           0             0                 0                   0                   0             0                     0               3                6
+Service Request                      2                      1           0             0                 0                   1                   0             0                     0               0              128
