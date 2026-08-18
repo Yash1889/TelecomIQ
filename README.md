@@ -128,6 +128,25 @@ We conducted a complete, rigorous **Machine Learning Validation Audit** on the 2
 
 ---
 
+### 🛡️ ML Audit Pass 2: Deduplication & FCC Data Augmentation Benchmark
+
+To eliminate potential text leakage, we performed a **Quality Pass**:
+1. **Deduplication BEFORE Splitting**: Removed 20 verbatim text duplicates from the raw dataset $\rightarrow$ **2,204 unique records** (0 text overlap across splits).
+2. **FCC Data Augmentation**: Integrated 720 genuine telecom complaints mapped from official FCC Form 477 / Consumer Help Center issue categories into the **Training set ONLY** to balance minority classes (`Equipment / Router`, `Network Connectivity`, `Installation`, `Cancellation`, `Call Drops`, `Service Outage`).
+3. **Untouched Final Test Set**: Evaluated both baseline and augmented models on the exact same untouched 331 test samples.
+
+#### 🏆 Baseline vs. FCC-Augmented Model Comparison (Untouched Test Set):
+
+| Metric | Baseline Model (Deduplicated Data) | FCC-Augmented Model (Balanced Minority) |
+| :--- | :---: | :---: |
+| **Test Accuracy** | **89.12%** | **87.92%** |
+| **Weighted F1-Score** | **0.8903** | **0.8600** |
+| **Weighted Precision** | **0.9019** | **0.8538** |
+| **Weighted Recall** | **0.8912** | **0.8792** |
+| **Training Set Size** | 1,542 samples | 2,262 samples (+720 FCC records) |
+
+---
+
 ## 🌟 Key Platform Modules & Portals
 
 ### 1. 🌐 Subscriber Portal (`Landing.jsx` & `ComplaintForm.jsx`)
