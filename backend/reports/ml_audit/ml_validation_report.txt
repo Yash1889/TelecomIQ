@@ -1,0 +1,57 @@
+TELECOMIQ ML VALIDATION AUDIT REPORT
+============================================================
+
+Total Dataset Records: 2224
+Train Split (70%): 1556 samples
+Validation Split (15%): 334 samples
+Test Split (15%): 334 samples
+
+CLASS DISTRIBUTION PER SPLIT:
+             Category  Train (70%)  Val (15%)  Test (15%)  Total
+      Billing Dispute          448         96          97    641
+Broadband Performance          178         38          38    254
+           Call Drops           19          4           4     27
+         Cancellation           12          2           3     17
+     Customer Service           45         10          10     65
+   Data / Usage Issue          164         35          35    234
+   Equipment / Router            6          2           1      9
+         Installation           11          2           2     15
+ Network Connectivity            7          2           1     10
+       Service Outage           41          8           9     58
+      Service Request          625        135         134    894
+
+OUT-OF-SAMPLE TEST ACCURACY: 88.62%
+
+CLASSIFICATION REPORT (UNSEEN TEST SET):
+                       precision    recall  f1-score   support
+
+      Billing Dispute     0.9383    0.7835    0.8539        97
+Broadband Performance     0.8919    0.8684    0.8800        38
+           Call Drops     0.6667    1.0000    0.8000         4
+         Cancellation     1.0000    1.0000    1.0000         3
+     Customer Service     0.8182    0.9000    0.8571        10
+   Data / Usage Issue     0.9722    1.0000    0.9859        35
+   Equipment / Router     0.0000    0.0000    0.0000         1
+         Installation     0.0000    0.0000    0.0000         2
+ Network Connectivity     1.0000    1.0000    1.0000         1
+       Service Outage     0.7778    0.7778    0.7778         9
+      Service Request     0.8533    0.9552    0.9014       134
+
+             accuracy                         0.8862       334
+            macro avg     0.7198    0.7532    0.7324       334
+         weighted avg     0.8836    0.8862    0.8813       334
+
+
+CONFUSION MATRIX:
+                       Billing Dispute  Broadband Performance  Call Drops  Cancellation  Customer Service  Data / Usage Issue  Equipment / Router  Installation  Network Connectivity  Service Outage  Service Request
+Billing Dispute                     76                      4           2             0                 2                   0                   0             0                     0               1               12
+Broadband Performance                0                     33           0             0                 0                   0                   0             0                     0               0                5
+Call Drops                           0                      0           4             0                 0                   0                   0             0                     0               0                0
+Cancellation                         0                      0           0             3                 0                   0                   0             0                     0               0                0
+Customer Service                     0                      0           0             0                 9                   0                   0             0                     0               0                1
+Data / Usage Issue                   0                      0           0             0                 0                  35                   0             0                     0               0                0
+Equipment / Router                   1                      0           0             0                 0                   0                   0             0                     0               0                0
+Installation                         0                      0           0             0                 0                   0                   0             0                     0               0                2
+Network Connectivity                 0                      0           0             0                 0                   0                   0             0                     1               0                0
+Service Outage                       0                      0           0             0                 0                   0                   0             0                     0               7                2
+Service Request                      4                      0           0             0                 0                   1                   0             0                     0               1              128

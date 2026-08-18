@@ -101,24 +101,30 @@ $$\text{Cosine Similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mat
 
 ---
 
-## 📈 Model Accuracy & Performance Benchmark
+## 📈 Model Performance & Rigorous ML Validation Audit
 
-Our Scikit-Learn classifier trained on the 2,224 Kaggle dataset achieves **96.00% Overall F1-Score Accuracy**:
+We conducted a complete, rigorous **Machine Learning Validation Audit** on the 2,224 Kaggle dataset records using a **Stratified 70% Train / 15% Validation / 15% Test** split.
 
-| Category | Precision | Recall | F1-Score | Support |
+### 🔍 Provenance of the 95.64% (~96%) Metric
+- **Full Dataset Training Fit**: The **95.64% (~96%)** metric initially reported was evaluated across the entire 2,224 dataset during full model fitting.
+- **Out-of-Sample Test Set Accuracy**: When trained **strictly on the 70% Training Split (1,556 samples)** and evaluated on the **completely unseen 15% Test Split (334 samples)**, the model achieves **88.62% Test Accuracy** and **88.13% Weighted F1-Score**.
+
+### 🧪 Out-of-Sample Test Set Metrics (Unseen 15% Split — 334 Samples)
+
+| Category | Precision | Recall | F1-Score | Test Support |
 | :--- | :---: | :---: | :---: | :---: |
-| **Billing Dispute** | 0.99 | 0.90 | 0.94 | 641 |
-| **Broadband Performance** | 0.95 | 0.99 | 0.97 | 254 |
-| **Call Drops** | 0.75 | 1.00 | 0.86 | 27 |
-| **Cancellation** | 0.89 | 1.00 | 0.94 | 17 |
-| **Customer Service** | 0.81 | 1.00 | 0.90 | 65 |
-| **Data / Usage Issue** | 0.96 | 0.98 | 0.97 | 234 |
-| **Equipment / Router** | 1.00 | 1.00 | **1.00** | 9 |
-| **Installation** | 1.00 | 1.00 | **1.00** | 15 |
-| **Network Connectivity** | 1.00 | 1.00 | **1.00** | 10 |
-| **Service Outage** | 0.83 | 1.00 | 0.91 | 58 |
-| **Service Request** | 0.97 | 0.97 | 0.97 | 894 |
-| **OVERALL SYSTEM METRIC** | **0.96** | **0.96** | **0.96** | **2,224** |
+| **Billing Dispute** | 0.9383 | 0.7835 | 0.8539 | 97 |
+| **Broadband Performance** | 0.8919 | 0.8684 | 0.8800 | 38 |
+| **Call Drops** | 0.6667 | 1.0000 | 0.8000 | 4 |
+| **Cancellation** | 1.0000 | 1.0000 | **1.0000** | 3 |
+| **Customer Service** | 0.8182 | 0.9000 | 0.8571 | 10 |
+| **Data / Usage Issue** | 0.9722 | 1.0000 | **0.9859** | 35 |
+| **Equipment / Router** | 0.0000 | 0.0000 | 0.0000 | 1 |
+| **Installation** | 0.0000 | 0.0000 | 0.0000 | 2 |
+| **Network Connectivity** | 1.0000 | 1.0000 | **1.0000** | 1 |
+| **Service Outage** | 0.7778 | 0.7778 | 0.7778 | 9 |
+| **Service Request** | 0.8533 | 0.9552 | 0.9014 | 134 |
+| **OVERALL UNSEEN TEST METRIC** | **0.8836** | **0.8862** | **0.8813** | **334** |
 
 ---
 
