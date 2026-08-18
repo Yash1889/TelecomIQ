@@ -1,0 +1,183 @@
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  // Fail fast instead of hanging forever if the backend/AI is slow.
+  // The chat backend caps its own work at ~15s, so 30s is safe headroom.
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// The backend runs on Render's free tier, which spins the container down after
+// ~15 min idle. The first request then pays a 30-60s cold-start boot. Auth is
+// usually that first request, so it gets a longer timeout — otherwise a healthy
+// login fails with a misleading "Failed to trigger OTP email" while the server
+// is merely waking up.
+const AUTH_TIMEOUT = 90000;
+
+export const submitComplaint = async (name, email, subject, description) => {
+  const response = await api.post("/complaint", {
+    name,
+    email,
+    subject,
+    description,
+  });
+  return response.data;
+};
+
+export const getAllComplaints = async (email = "") => {
+  const url = email ? `/complaints?email=${encodeURIComponent(email)}` : "/complaints";
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const deleteAllComplaints = async (email = "") => {
+  const response = await api.delete("/complaints", {
+    params: email ? { email } : {}
+  });
+  return response.data;
+};
+
+export const submitFeedback = async (feedbackData) => {
+  const response = await api.post("/feedback", feedbackData);
+  return response.data;
+};
+
+export const submitReview = async (ticketId, rating, feedback) => {
+  const response = await api.post(`/complaint/${ticketId}/review`, { rating, feedback });
+  return response.data;
+};
+
+export const updateComplaintStatus = async (ticketId, is_resolved, admin_solution = null) => {
+  const body = { is_resolved };
+  if (admin_solution) {
+    body.admin_solution = admin_solution;
+  }
+  const response = await api.patch(`/complaint/${ticketId}/status`, body);
+  return response.data;
+};
+
+export const deleteComplaint = async (ticketId) => {
+  const response = await api.delete(`/complaint/${ticketId}`);
+  return response.data;
+};
+
+export const bulkDeleteComplaints = async (ids) => {
+  const response = await api.delete("/complaints/bulk", { data: { ids } });
+  return response.data;
+};
+
+
+// Auth API
+export const registerUser = async (email, fullName, password, phone, organization, profileImage) => {
+  const response = await api.post("/auth/register", {
+    email,
+    full_name: fullName,
+    password,
+    phone,
+    organization,
+    profile_image: profileImage
+  }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const requestOTP = async (email) => {
+  const response = await api.post("/auth/request-otp", { email }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const verifyOTP = async (email, otp, location = null) => {
+  const response = await api.post("/auth/verify-otp", { email, otp, location }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const loginWithPassword = async (email, password, location = null) => {
+  const response = await api.post("/auth/login-password", { email, password, location }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const forgotPassword = async (email) => {
+  const response = await api.post("/auth/forgot-password", { email }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const resetPassword = async (email, reset_token, new_password) => {
+  const response = await api.post("/auth/reset-password", { email, reset_token, new_password }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const googleAuth = async (token, name, location = null) => {
+  const response = await api.post("/auth/google", { token, name, location }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const googleVerifyOTP = async (email, otp, location = null) => {
+  const response = await api.post("/auth/google-verify-otp", { email, otp, location }, { timeout: AUTH_TIMEOUT });
+  return response.data;
+};
+
+export const updateProfile = async (email, profileData) => {
+  const response = await api.patch(`/auth/update-profile?email=${encodeURIComponent(email)}`, profileData);
+  return response.data;
+};
+
+export const logoutUser = async (email) => {
+  const response = await api.post(`/auth/logout?email=${encodeURIComponent(email)}`);
+  return response.data;
+};
+
+export const submitResolutionFeedback = async (ticketId, isActuallyResolved, userComment = "") => {
+  const response = await api.post(`/complaint/${ticketId}/resolution-feedback`, {
+    is_actually_resolved: isActuallyResolved,
+    user_comment: userComment
+  });
+  return response.data;
+};
+
+// Agent Module API
+export const getAgentQueue = async (agentEmail, params = {}) => {
+  const queryParams = new URLSearchParams({ agent_email: agentEmail, ...params }).toString();
+  const response = await api.get(`/agent/complaints/queue?${queryParams}`);
+  return response.data;
+};
+
+export const getComplaintDetail = async (ticketId, agentEmail) => {
+  const response = await api.get(`/agent/complaints/${ticketId}?agent_email=${encodeURIComponent(agentEmail)}`);
+  return response.data;
+};
+
+export const validateSolution = async (agentEmail, ticketId, draftSolution, steps = null) => {
+  const response = await api.post("/agent/validate-solution", {
+    agent_email: agentEmail,
+    ticket_id: ticketId,
+    draft_solution: draftSolution,
+    steps: steps
+  });
+  return response.data;
+};
+
+export const sendResolution = async (agentEmail, ticketId, finalSolution, steps = null) => {
+  const response = await api.post("/agent/send-resolution", {
+    agent_email: agentEmail,
+    ticket_id: ticketId,
+    final_solution: finalSolution,
+    steps: steps
+  });
+  return response.data;
+};
+
+export const getAllResolutions = async (agentEmail, params = {}) => {
+  const queryParams = new URLSearchParams({ agent_email: agentEmail, ...params }).toString();
+  const response = await api.get(`/agent/resolutions?${queryParams}`);
+  return response.data;
+};
+
+export const getAuditLogs = async (agentEmail, params = {}) => {
+  const queryParams = new URLSearchParams({ agent_email: agentEmail, ...params }).toString();
+  const response = await api.get(`/agent/audit-logs?${queryParams}`);
+  return response.data;
+};
+
+export default api;

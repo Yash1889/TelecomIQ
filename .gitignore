@@ -1,0 +1,50 @@
+# =====================
+# Secrets & Environment (CRITICAL)
+# =====================
+# Ignores .env files in any folder to prevent leaks
+.env
+.env.*
+*.env
+backend/.env
+frontend/.env
+
+# =====================
+# Python (Backend)
+# =====================
+__pycache__/
+*.pyc
+backend/venv/
+venv/
+
+# =====================
+# Node / Frontend
+# =====================
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+build/
+
+# =====================
+# Local SQLite databases
+# =====================
+# Never commit these: a committed .db file is redeployed over the live data on
+# every push, and the real database is Turso (see DATABASE_URL).
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# =====================
+# OS / Editor
+# =====================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# =====================
+# Claude Code (local agent config — do not push)
+# =====================
+.claude/
+ALL files structure/

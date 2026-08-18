@@ -1,0 +1,57 @@
+[
+  {
+    "category": "Network Connectivity",
+    "topic": "Cell Tower / Signal Outage & Network Degradation",
+    "content": "For zero-signal or fluctuating network coverage: 1. Perform cell tower congestion check & regional cell site status review in network management system. 2. Verify SIM status and VoLTE/5G provisioning. 3. Recommended Initial Action: Issue network reset signal to subscriber SIM, advise toggle Airplane Mode for 30s. Escalation Condition: If 5+ users report site failure within 1km or issue exceeds 4 hours, escalate immediately to Network Operations Center (NOC). Target SLA: 4 hours."
+  },
+  {
+    "category": "Broadband Performance",
+    "topic": "Fiber Optic Line Degradation & High Latency",
+    "content": "For slow internet speeds, high latency (>100ms), or intermittent fiber disconnects: 1. Run automated optical line terminal (OLT) loopback diagnostic test to measure rx/tx optical power levels (-18 dBm to -25 dBm optimal). 2. Check local fiber distribution box (FDB) splitter for attenuation issues. 3. Recommended Initial Action: Reboot optical network terminal (ONT), check line attenuation. Escalation Condition: If rx power drops below -28 dBm or physical fiber cut suspected, dispatch field technician. Target SLA: 6 hours."
+  },
+  {
+    "category": "Call Drops",
+    "topic": "Frequent Voice Call Interruption & VoLTE Handover Failure",
+    "content": "For repeated dropped calls during voice/video calls: 1. Analyze mobile switching center (MSC) call detail records (CDR) for call release cause codes (e.g. Code 41 - Temporary Failure, Code 16 - Normal Clearing). 2. Check neighbor cell handover configuration and local tower azimuth settings. 3. Recommended Initial Action: Refresh network registration profile, update APN settings to default. Escalation Condition: High drop rate (>3%) across sector requires RF Radio Frequency team audit. Target SLA: 12 hours."
+  },
+  {
+    "category": "Service Outage",
+    "topic": "Major Regional Cable Cut & Node Power Outage",
+    "content": "For complete internet, landline, or cellular blackout across a neighborhood/zone: 1. Cross-reference complaint location coordinates with NOC active outage alert dashboard. 2. Verify backup battery generator status at local telecom exchange node. 3. Recommended Action: Inform subscriber of active regional incident #INC-TELCO, provide estimated restoration time (ETR), flag ticket as outage-dependent. Escalation Condition: Automatic critical severity; link subscriber ticket to master incident. Target SLA: 2 hours."
+  },
+  {
+    "category": "Billing Dispute",
+    "topic": "Overcharging, Unrecognized Value Added Services (VAS) & Auto-Debit Errors",
+    "content": "For billing discrepancies, extra data charges, or unauthorized subscription charges: 1. Retrieve billing breakdown statement for the disputed period, compare against subscriber base plan rate card. 2. Inspect active VAS sub-services in customer relationship management (CRM) portal. 3. Recommended Initial Action: Deactivate unauthorized VAS, calculate eligible bill credit/adjustment according to telecom credit policy. Escalation Condition: Disputes > ₹2,000 / $50 require Finance Supervisor approval. Target SLA: 24 hours."
+  },
+  {
+    "category": "Data / Usage Issue",
+    "topic": "Premature Daily Fair Usage Policy (FUP) Limit Depletion",
+    "content": "For complaints regarding data quota draining faster than normal or incorrect speed throttling: 1. Pull data session logs showing timestamped megabyte consumption per IP endpoint. 2. Verify FUP quota reset timing (typically midnight 00:00 IST). 3. Recommended Initial Action: Explain background application consumption to subscriber, provide data top-up promo voucher if system metering error is verified. Target SLA: 8 hours."
+  },
+  {
+    "category": "Installation",
+    "topic": "Delayed Broadband Fiber / Fixed Wireless Access (FWA) Setup",
+    "content": "For pending installation appointments exceeding 48 hours: 1. Inspect field work order queue and engineer dispatch schedule in Field Service Management (FSM). 2. Verify port availability on nearby feeder pillar box. 3. Recommended Initial Action: Re-assign priority slot to nearest field technician, send SMS tracker link to customer. Escalation Condition: Unresolved past 72 hours triggers installation SLA penalty credit. Target SLA: 12 hours."
+  },
+  {
+    "category": "Equipment / Router",
+    "topic": "Wi-Fi Router Hardware Fault & Red Power Light / No PON LED",
+    "content": "For router PON LED flashing red, LOS light red, or device overheating: 1. Check optical patch cord cable integrity and power adapter output voltage. 2. Execute remote router diagnostic ping test. 3. Recommended Initial Action: Hard reset router (10s pinhole press), re-flash firmware remotely. Escalation Condition: Faulty hardware requires router replacement order dispatch within 24 hours. Target SLA: 24 hours."
+  },
+  {
+    "category": "Service Request",
+    "topic": "Plan Upgrade, Address Relocation & Static IP Allocation",
+    "content": "For customer requests to shift broadband connection or change subscription plan: 1. Perform feasibility check at target relocation address for fiber port availability. 2. Provision static IP configuration on subscriber profile if requested. 3. Recommended Initial Action: Create service order, issue line transfer mandate to field team. Target SLA: 24 hours."
+  },
+  {
+    "category": "Cancellation",
+    "topic": "Port Out Request (MNP) & Account Termination Risk",
+    "content": "For subscribers requesting mobile number portability (MNP) UPC code or service cancellation due to dissatisfaction: 1. Identify underlying root cause (poor coverage, billing dissatisfaction, support delay). 2. Evaluate subscriber tenure and churn risk score. 3. Recommended Initial Action: Route complaint immediately to Retention & Escalation Team, offer network signal booster / plan discount compensation. Escalation Condition: High-value account cancellation flagged for VP Retention review. Target SLA: 2 hours."
+  },
+  {
+    "category": "Customer Service",
+    "topic": "Agent Conduct, Delayed Resolution & Unfulfilled Callbacks",
+    "content": "For customer complaints regarding unhelpful phone support agents or unresolved previous tickets: 1. Review call recordings and chat interaction transcripts attached to previous ticket IDs. 2. Check ticket SLA breach history. 3. Recommended Initial Action: Assign dedicated senior resolution officer, issue formal apology with service SLA extension credit. Target SLA: 6 hours."
+  }
+]
