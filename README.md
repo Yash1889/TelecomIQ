@@ -101,49 +101,42 @@ $$\text{Cosine Similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mat
 
 ---
 
-## 📈 Model Performance & Rigorous ML Validation Audit
+## 📈 Authoritative ML Validation Audit (Kaggle Dataset)
 
-We conducted a complete, rigorous **Machine Learning Validation Audit** on the 2,224 Kaggle dataset records using a **Stratified 70% Train / 15% Validation / 15% Test** split.
+We performed a rigorous **Machine Learning Validation Audit** on the Kaggle Telecom Complaints dataset (`ravillatejakumar/telecom-complaints-monitoring-system` / `Comcast_telecom_complaints_data.csv`).
 
-### 🔍 Provenance of the 95.64% (~96%) Metric
-- **Full Dataset Training Fit**: The **95.64% (~96%)** metric initially reported was evaluated across the entire 2,224 dataset during full model fitting.
-- **Out-of-Sample Test Set Accuracy**: When trained **strictly on the 70% Training Split (1,556 samples)** and evaluated on the **completely unseen 15% Test Split (334 samples)**, the model achieves **88.62% Test Accuracy** and **88.13% Weighted F1-Score**.
-
-### 🧪 Out-of-Sample Test Set Metrics (Unseen 15% Split — 334 Samples)
-
-| Category | Precision | Recall | F1-Score | Test Support |
-| :--- | :---: | :---: | :---: | :---: |
-| **Billing Dispute** | 0.9383 | 0.7835 | 0.8539 | 97 |
-| **Broadband Performance** | 0.8919 | 0.8684 | 0.8800 | 38 |
-| **Call Drops** | 0.6667 | 1.0000 | 0.8000 | 4 |
-| **Cancellation** | 1.0000 | 1.0000 | **1.0000** | 3 |
-| **Customer Service** | 0.8182 | 0.9000 | 0.8571 | 10 |
-| **Data / Usage Issue** | 0.9722 | 1.0000 | **0.9859** | 35 |
-| **Equipment / Router** | 0.0000 | 0.0000 | 0.0000 | 1 |
-| **Installation** | 0.0000 | 0.0000 | 0.0000 | 2 |
-| **Network Connectivity** | 1.0000 | 1.0000 | **1.0000** | 1 |
-| **Service Outage** | 0.7778 | 0.7778 | 0.7778 | 9 |
-| **Service Request** | 0.8533 | 0.9552 | 0.9014 | 134 |
-| **OVERALL UNSEEN TEST METRIC** | **0.8836** | **0.8862** | **0.8813** | **334** |
+### 🛡️ Quality Control & Leakage Prevention
+1. **Deduplication BEFORE Splitting**: Removed 20 verbatim text string duplicates from the raw 2,224 dataset $\rightarrow$ **2,204 clean unique records**.
+2. **Stratified 70/15/15 Split**:
+   - **Training Set (70%)**: 1,542 samples
+   - **Validation Set (15%)**: 331 samples
+   - **Held-Out Test Set (15%)**: 331 samples (100% untouched)
+3. **Data Leakage Verification**: **0 text overlap** across Train, Validation, and Test splits.
 
 ---
 
-### 🛡️ ML Audit Pass 2: Deduplication & FCC Data Augmentation Benchmark
+### 🧪 Held-Out Test Set Performance (Unseen 15% Split — 331 Samples)
 
-To eliminate potential text leakage, we performed a **Quality Pass**:
-1. **Deduplication BEFORE Splitting**: Removed 20 verbatim text duplicates from the raw dataset $\rightarrow$ **2,204 unique records** (0 text overlap across splits).
-2. **FCC Data Augmentation**: Integrated 720 genuine telecom complaints mapped from official FCC Form 477 / Consumer Help Center issue categories into the **Training set ONLY** to balance minority classes (`Equipment / Router`, `Network Connectivity`, `Installation`, `Cancellation`, `Call Drops`, `Service Outage`).
-3. **Untouched Final Test Set**: Evaluated both baseline and augmented models on the exact same untouched 331 test samples.
+- **Test Accuracy**: **89.12%**
+- **Weighted F1-Score**: **0.8903**
+- **Weighted Precision**: **0.9019**
+- **Weighted Recall**: **0.8912**
+- **Macro F1-Score**: **0.7300**
 
-#### 🏆 Baseline vs. FCC-Augmented Model Comparison (Untouched Test Set):
-
-| Metric | Baseline Model (Deduplicated Data) | FCC-Augmented Model (Balanced Minority) |
-| :--- | :---: | :---: |
-| **Test Accuracy** | **89.12%** | **87.92%** |
-| **Weighted F1-Score** | **0.8903** | **0.8600** |
-| **Weighted Precision** | **0.9019** | **0.8538** |
-| **Weighted Recall** | **0.8912** | **0.8792** |
-| **Training Set Size** | 1,542 samples | 2,262 samples (+720 FCC records) |
+| Category | Precision | Recall | F1-Score | Held-Out Test Support |
+| :--- | :---: | :---: | :---: | :---: |
+| **Billing Dispute** | 0.9872 | 0.8021 | **0.8851** | 96 |
+| **Broadband Performance** | 0.9024 | 0.9737 | **0.9367** | 38 |
+| **Call Drops** | 0.6667 | 1.0000 | **0.8000** | 4 |
+| **Cancellation** | 0.7500 | 1.0000 | **0.8571** | 3 |
+| **Customer Service** | 0.8889 | 0.8889 | **0.8889** | 9 |
+| **Data / Usage Issue** | 0.9444 | 0.9714 | **0.9577** | 35 |
+| **Equipment / Router** | 0.5000 | 1.0000 | **0.6667** | 1 |
+| **Installation** | 1.0000 | 0.3333 | **0.5000** | 3 |
+| **Network Connectivity** | 0.0000 | 0.0000 | 0.0000 | 1 |
+| **Service Outage** | 0.5385 | 0.7778 | **0.6364** | 9 |
+| **Service Request** | 0.8723 | 0.9318 | **0.9011** | 132 |
+| **OVERALL SYSTEM METRIC** | **0.9019** | **0.8912** | **0.8903** | **331** |
 
 ---
 

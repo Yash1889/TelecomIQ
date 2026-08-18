@@ -1,57 +1,63 @@
-TELECOMIQ ML VALIDATION AUDIT REPORT
+TELECOMIQ AUTHORITATIVE ML VALIDATION REPORT
+============================================================
+Dataset: Kaggle ravillatejakumar/telecom-complaints-monitoring-system
 ============================================================
 
-Total Dataset Records: 2224
-Train Split (70%): 1556 samples
-Validation Split (15%): 334 samples
-Test Split (15%): 334 samples
+Raw Dataset Count: 2224
+Clean Unique Dataset Count: 2204 (20 duplicates removed before split)
+
+Train Split (70%): 1542 samples
+Validation Split (15%): 331 samples
+Test Split (15%): 331 samples (UNTOUCHED HELD-OUT TEST SET)
+
+TEST ACCURACY: 89.12%
+TEST WEIGHTED F1-SCORE: 0.8903
+TEST MACRO F1-SCORE: 0.7300
 
 CLASS DISTRIBUTION PER SPLIT:
              Category  Train (70%)  Val (15%)  Test (15%)  Total
-      Billing Dispute          448         96          97    641
-Broadband Performance          178         38          38    254
-           Call Drops           19          4           4     27
+      Billing Dispute          448         96          96    640
+Broadband Performance          176         38          38    252
+           Call Drops           18          4           4     26
          Cancellation           12          2           3     17
-     Customer Service           45         10          10     65
-   Data / Usage Issue          164         35          35    234
-   Equipment / Router            6          2           1      9
-         Installation           11          2           2     15
+     Customer Service           45         10           9     64
+   Data / Usage Issue          162         34          35    231
+   Equipment / Router            6          1           1      8
+         Installation           10          2           3     15
  Network Connectivity            7          2           1     10
-       Service Outage           41          8           9     58
-      Service Request          625        135         134    894
-
-OUT-OF-SAMPLE TEST ACCURACY: 88.62%
+       Service Outage           40          9           9     58
+      Service Request          618        133         132    883
 
 CLASSIFICATION REPORT (UNSEEN TEST SET):
                        precision    recall  f1-score   support
 
-      Billing Dispute     0.9383    0.7835    0.8539        97
-Broadband Performance     0.8919    0.8684    0.8800        38
+      Billing Dispute     0.9872    0.8021    0.8851        96
+Broadband Performance     0.9024    0.9737    0.9367        38
            Call Drops     0.6667    1.0000    0.8000         4
-         Cancellation     1.0000    1.0000    1.0000         3
-     Customer Service     0.8182    0.9000    0.8571        10
-   Data / Usage Issue     0.9722    1.0000    0.9859        35
-   Equipment / Router     0.0000    0.0000    0.0000         1
-         Installation     0.0000    0.0000    0.0000         2
- Network Connectivity     1.0000    1.0000    1.0000         1
-       Service Outage     0.7778    0.7778    0.7778         9
-      Service Request     0.8533    0.9552    0.9014       134
+         Cancellation     0.7500    1.0000    0.8571         3
+     Customer Service     0.8889    0.8889    0.8889         9
+   Data / Usage Issue     0.9444    0.9714    0.9577        35
+   Equipment / Router     0.5000    1.0000    0.6667         1
+         Installation     1.0000    0.3333    0.5000         3
+ Network Connectivity     0.0000    0.0000    0.0000         1
+       Service Outage     0.5385    0.7778    0.6364         9
+      Service Request     0.8723    0.9318    0.9011       132
 
-             accuracy                         0.8862       334
-            macro avg     0.7198    0.7532    0.7324       334
-         weighted avg     0.8836    0.8862    0.8813       334
+             accuracy                         0.8912       331
+            macro avg     0.7319    0.7890    0.7300       331
+         weighted avg     0.9019    0.8912    0.8903       331
 
 
 CONFUSION MATRIX:
                        Billing Dispute  Broadband Performance  Call Drops  Cancellation  Customer Service  Data / Usage Issue  Equipment / Router  Installation  Network Connectivity  Service Outage  Service Request
-Billing Dispute                     76                      4           2             0                 2                   0                   0             0                     0               1               12
-Broadband Performance                0                     33           0             0                 0                   0                   0             0                     0               0                5
+Billing Dispute                     77                      3           2             1                 0                   1                   1             0                     0               1               10
+Broadband Performance                0                     37           0             0                 0                   0                   0             0                     0               0                1
 Call Drops                           0                      0           4             0                 0                   0                   0             0                     0               0                0
 Cancellation                         0                      0           0             3                 0                   0                   0             0                     0               0                0
-Customer Service                     0                      0           0             0                 9                   0                   0             0                     0               0                1
-Data / Usage Issue                   0                      0           0             0                 0                  35                   0             0                     0               0                0
-Equipment / Router                   1                      0           0             0                 0                   0                   0             0                     0               0                0
-Installation                         0                      0           0             0                 0                   0                   0             0                     0               0                2
-Network Connectivity                 0                      0           0             0                 0                   0                   0             0                     1               0                0
+Customer Service                     0                      0           0             0                 8                   0                   0             0                     0               0                1
+Data / Usage Issue                   0                      0           0             0                 0                  34                   0             0                     0               0                1
+Equipment / Router                   0                      0           0             0                 0                   0                   1             0                     0               0                0
+Installation                         0                      0           0             0                 0                   0                   0             1                     0               0                2
+Network Connectivity                 0                      0           0             0                 0                   0                   0             0                     0               0                1
 Service Outage                       0                      0           0             0                 0                   0                   0             0                     0               7                2
-Service Request                      4                      0           0             0                 0                   1                   0             0                     0               1              128
+Service Request                      1                      1           0             0                 1                   1                   0             0                     0               5              123
