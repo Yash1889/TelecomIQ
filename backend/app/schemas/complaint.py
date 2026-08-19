@@ -12,6 +12,7 @@ class ComplaintRequest(BaseModel):
 
 class ComplaintResponse(BaseModel):
     """Response schema with AI analysis results"""
+    is_sufficient: Optional[bool] = True
     ticket_id: Optional[str] = None
     subject: Optional[str] = None
     description: Optional[str] = None

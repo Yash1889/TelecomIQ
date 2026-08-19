@@ -46,12 +46,14 @@ export default function AgentModule({ user, onNavigate }) {
 
             // Calculate stats for demonstration
             const total = data.total || 0;
-            const critical = (data.complaints || []).filter(c => c.sentiment === 'Critical' || c.priority === 'High').length;
+            const complaints = data.complaints || [];
+            const critical = complaints.filter(c => c.priority === 'CRITICAL' || c.priority === 'P1 - CRITICAL' || c.priority === 'HIGH' || c.priority === 'P2 - HIGH').length;
+            const escalated = complaints.filter(c => c.escalation_required || (c.escalation_risk_score && c.escalation_risk_score >= 60.0)).length;
             setStats({
                 total,
-                pending: filters.status === 'pending' ? total : 0, // Simplified
+                pending: filters.status === 'pending' ? total : complaints.filter(c => !c.is_resolved).length,
                 critical,
-                avg_confidence: 94.2 // Mocked for UI
+                escalated
             });
         } catch (error) {
             console.error("Failed to fetch queue", error);
@@ -210,8 +212,8 @@ export default function AgentModule({ user, onNavigate }) {
                         <span className="stat-value" style={{ color: 'var(--agent-error)' }}>{stats.critical}</span>
                     </motion.div>
                     <motion.div className="stat-glow-card" whileHover={{ y: -5 }}>
-                        <span className="stat-label">AI Consensus Score</span>
-                        <span className="stat-value" style={{ color: 'var(--agent-accent)' }}>{stats.avg_confidence}%</span>
+                        <span className="stat-label">Escalated Tickets</span>
+                        <span className="stat-value" style={{ color: 'var(--agent-warning)' }}>{stats.escalated}</span>
                     </motion.div>
                 </div>
 

@@ -28,7 +28,7 @@ export default function ComplaintCard({ data }) {
   } = data;
 
   const handleCopyTicket = () => {
-    navigator.clipboard.writeText(ticket_id);
+    navigator.clipboard.writeText(ticket_id || "");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -51,6 +51,32 @@ export default function ComplaintCard({ data }) {
   };
 
   const prioStyle = getPriorityStyle(priority);
+
+  if (data.is_sufficient === false) {
+    return (
+      <div className="complaint-card" style={{ borderTop: "4px solid #f59e0b", background: "rgba(245, 158, 11, 0.05)", padding: "1.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem" }}>
+          <span style={{ fontSize: "1.5rem" }}>ℹ️</span>
+          <div>
+            <h3 style={{ margin: 0, color: "#d97706", fontSize: "1.15rem" }}>Insufficient Complaint Information</h3>
+            <p style={{ margin: "0.2rem 0 0 0", opacity: 0.9, fontSize: "0.9rem" }}>Automated AI analysis was paused because the submitted message lacks actionable telecom details.</p>
+          </div>
+        </div>
+        <div style={{ background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.3)", padding: "1rem", borderRadius: "8px", fontSize: "0.9rem", lineHeight: 1.5 }}>
+          <strong>Required Details to Process Your Request:</strong>
+          <ul style={{ margin: "0.5rem 0 0 1.2rem", padding: 0 }}>
+            <li>Specific issue description (e.g. broadband disconnected, billing overcharge, dropped calls)</li>
+            <li>Affected service type (e.g. Fiber Internet, Mobile Signal, SIM, Router)</li>
+            <li>Problem duration (e.g. since yesterday, past 2 hours)</li>
+            <li>Location / Area if relevant</li>
+          </ul>
+        </div>
+        <p style={{ marginTop: "1rem", marginBottom: 0, fontSize: "0.9rem", fontStyle: "italic", opacity: 0.85 }}>
+          💬 {response}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="complaint-card" style={{ borderTop: `4px solid ${prioStyle.text}` }}>

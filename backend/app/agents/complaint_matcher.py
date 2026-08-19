@@ -18,38 +18,17 @@ def get_vector_store():
             print(f"⚠️ Failed to load vector index: {e}")
     return _vector_store
 
-async def find_similar_complaints(text: str, category: str = "", top_k: int = 3) -> list:
+async def find_similar_complaints(text: str, category: str = "", top_k: int = 3, current_ticket_id: str = "") -> list:
     """
-    Perform real vector semantic search over historical telecom complaints.
-    Returns list of dicts with:
-    - ticket_id: string
-    - category: string
-    - description: string
-    - status: string
-    - similarity_percent: float (e.g., 94.2)
+    Perform genuine vector semantic search over historical telecom complaints.
+    Returns top-K items with exact cosine similarity percentages.
     """
     if not text or not text.strip():
         return []
 
     store = get_vector_store()
     if not store:
-        # Fallback if vector index file isn't loaded yet
-        return [
-            {
-                "ticket_id": "#TC-48291",
-                "category": category or "Network Connectivity",
-                "description": "Repeated broadband disconnection and line signal drop",
-                "status": "Solved",
-                "similarity_percent": 94.0
-            },
-            {
-                "ticket_id": "#TC-39012",
-                "category": category or "Broadband Performance",
-                "description": "High latency and optical power level attenuation",
-                "status": "Closed",
-                "similarity_percent": 89.0
-            }
-        ]
+        return []
 
     try:
         vectorizer = store["vectorizer"]
@@ -59,21 +38,35 @@ async def find_similar_complaints(text: str, category: str = "", top_k: int = 3)
         query_vec = vectorizer.transform([text])
         similarities = cosine_similarity(query_vec, matrix).flatten()
 
-        top_indices = np.argsort(similarities)[-top_k:][::-1]
+        # Sort candidate indices by cosine similarity descending
+        sorted_indices = np.argsort(similarities)[::-1]
 
         results = []
-        for idx in top_indices:
+        for idx in sorted_indices:
             score = float(similarities[idx])
-            # Adjust scaling for realistic user display %
-            match_pct = round(min(98.5, max(45.0, score * 100 + 40.0)), 1)
+            score_pct = round(score * 100.0, 1)
+
             item = complaints[idx]
+            ticket_id = f"#{item.get('ticket_id', 'TC-1000')}"
+
+            # Filter out self-match if querying existing ticket
+            if current_ticket_id and current_ticket_id in ticket_id:
+                continue
+
+            # Ignore non-relevant low cosine similarity matches (< 5%)
+            if score_pct < 5.0 and len(results) > 0:
+                continue
+
             results.append({
-                "ticket_id": f"#{item.get('ticket_id', 'TC-1000')}",
-                "category": item.get("category", category),
-                "description": item.get("subject", item.get("description", "")[:80]),
+                "ticket_id": ticket_id,
+                "category": item.get("category", category or "Network Connectivity"),
+                "description": item.get("subject", item.get("description", item.get("complaint_text", "")))[:100],
                 "status": item.get("status", "Solved"),
-                "similarity_percent": match_pct
+                "similarity_percent": score_pct
             })
+
+            if len(results) >= top_k:
+                break
 
         return results
     except Exception as e:

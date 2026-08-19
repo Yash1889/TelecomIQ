@@ -790,12 +790,12 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
                                             <p>{selectedComplaint.satisfaction_prediction || "N/A"}</p>
                                         </div>
                                         <div className="admin-modal-field">
-                                            <label>Churn Risk</label>
+                                            <label>Escalation Risk</label>
                                             <span style={{
-                                                color: selectedComplaint.churn_risk === 'Critical' ? '#ef4444' : selectedComplaint.churn_risk === 'Elevated' ? '#f59e0b' : '#10b981',
+                                                color: selectedComplaint.escalation_risk_score >= 60 ? '#ef4444' : selectedComplaint.escalation_risk_score >= 35 ? '#f59e0b' : '#10b981',
                                                 fontWeight: 'bold'
                                             }}>
-                                                🔥 {selectedComplaint.churn_risk || "Low"}
+                                                ⚠️ {selectedComplaint.escalation_risk_score ? `${selectedComplaint.escalation_risk_score}%` : (selectedComplaint.escalation_required ? "Required" : "Low")}
                                             </span>
                                         </div>
                                     </div>

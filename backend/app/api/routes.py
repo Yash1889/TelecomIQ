@@ -98,6 +98,7 @@ async def handle_complaint(
         })
 
         return ComplaintResponse(
+            is_sufficient=result.get("is_sufficient", True),
             ticket_id=ticket_id,
             subject=data.subject,
             description=data.description,
