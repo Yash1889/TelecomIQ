@@ -12,7 +12,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'https://customer-complaint-agent-new-1.onrender.com';
+const BASE_URL = __ENV.BASE_URL || 'https://telecomiq-backend-xv8i.onrender.com';
 
 export const options = {
   // Ramping profile rather than a flat wall of VUs, so the point at which
