@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
   // Fail fast instead of hanging forever if the backend/AI is slow.
   // The chat backend caps its own work at ~15s, so 30s is safe headroom.
   timeout: 30000,

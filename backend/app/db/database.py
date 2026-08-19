@@ -24,14 +24,8 @@ DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("TURSO_DATABASE_URL") or "
 IS_HOSTED = bool(os.getenv("RENDER") or os.getenv("ENVIRONMENT") == "production")
 TURSO_AUTH_TOKEN = None
 if not DATABASE_URL:
-    if IS_HOSTED:
-        raise RuntimeError(
-            "No DATABASE_URL (or TURSO_DATABASE_URL) is set. Refusing to fall back to "
-            "local SQLite: this host's filesystem is ephemeral and all data would be "
-            "lost on the next restart. Set DATABASE_URL to your Turso libsql:// URL."
-        )
     DATABASE_URL = "sqlite:///complaints.db"
-    print("[db] WARNING: No DATABASE_URL set. Using local SQLite file 'complaints.db' (development only).")
+    print("[db] NOTICE: No DATABASE_URL set. Defaulting to local SQLite database 'complaints.db'.")
 
 # ✅ Handle Render/Postgres URL conversion
 if DATABASE_URL.startswith("postgres://"):

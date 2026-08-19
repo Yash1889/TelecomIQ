@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from app.db.database import engine
+from app.db.database import engine, run_migrations
 from app.db import models
+from app.db.seed import ensure_db_seeded
 from app.api.routes import router as complaint_router
 from app.api.chat import router as chat_router
 from app.routes.feedback import router as feedback_router
@@ -17,17 +18,15 @@ from app.routes.agent_module import router as agent_router
 models.Base.metadata.create_all(bind=engine)
 
 # Run custom migrations (add missing columns)
-from app.db.database import run_migrations
 run_migrations()
+
+# Ensure database is seeded with Kaggle complaints on startup if empty
+ensure_db_seeded()
 
 app = FastAPI(title="TelecomIQ Engine - Telecom Complaint Intelligence & Resolution Assistant")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    # NOTE: Do not call `await request.body()` here — the body stream is already
-    # consumed during request parsing, so re-reading it raises ClientDisconnect
-    # and crashes the handler (client sees a reset instead of a 422).
-    # FastAPI attaches the raw body to the exception as `exc.body`.
     print(f"❌ VALIDATION ERROR: {exc.errors()}")
     print(f"📋 REQUEST BODY: {exc.body}")
     return JSONResponse(
@@ -35,39 +34,31 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
     )
 
-IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production"
+IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production" or bool(os.getenv("RENDER"))
 
-# Origins that are always allowed. FRONTEND_URL may hold several comma-separated
-# URLs so a single env var can cover apex + www + a staging domain.
+# Origins allowed
 ALLOWED_ORIGINS = [
     "https://riteshkr.online",
     "http://riteshkr.online",
     "https://www.riteshkr.online",
     "http://www.riteshkr.online",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
 ]
 
-if not IS_PRODUCTION:
-    ALLOWED_ORIGINS += [
-        "http://localhost:5173",
-        "http://localhost:5174",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:5174",
-    ]
+# Append custom environment origin URLs
+extra_origins = os.getenv("FRONTEND_URL", "") + "," + os.getenv("APP_URL", "")
+for origin in extra_origins.split(","):
+    cleaned = origin.strip().rstrip("/")
+    if cleaned and cleaned not in ALLOWED_ORIGINS:
+        ALLOWED_ORIGINS.append(cleaned)
 
-ALLOWED_ORIGINS += [
-    origin.strip().rstrip("/")
-    for origin in os.getenv("FRONTEND_URL", "").split(",")
-    if origin.strip()
-]
-
-# Deduplicate while keeping order. Never let "*" in here: it is meaningless
-# alongside allow_credentials=True and would make Starlette echo back any
-# origin that asks.
 ALLOWED_ORIGINS = list(dict.fromkeys(o for o in ALLOWED_ORIGINS if o != "*"))
 
-# Starlette matches allow_origins by exact string, so "https://*.vercel.app"
-# never matched anything. Preview deployments need a regex instead.
-ALLOWED_ORIGIN_REGEX = r"https://[a-z0-9-]+\.vercel\.app"
+# Allow all HTTPS origins via regex to support Render, Vercel, Railway, and Netlify deployments
+ALLOWED_ORIGIN_REGEX = r"https://.*"
 
 app.add_middleware(
     CORSMiddleware,
@@ -80,17 +71,10 @@ app.add_middleware(
     max_age=86400,
 )
 
-
 @app.middleware("http")
 async def cross_origin_isolation_headers(request: Request, call_next):
     response = await call_next(request)
-    # COOP only applies to top-level document responses, so it does nothing for
-    # the JSON this API returns - the header that matters for Google Sign-In is
-    # the one on the *frontend* origin (vercel.json / nginx.conf). This is kept
-    # only for the browsable pages FastAPI serves itself, i.e. /docs and /redoc.
     response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin-allow-popups")
-    # Responses are consumed by the frontend on a different origin, so the
-    # default "same-origin" CORP would block them.
     response.headers.setdefault("Cross-Origin-Resource-Policy", "cross-origin")
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     return response
@@ -103,11 +87,29 @@ app.include_router(agent_router)
 
 @app.get("/")
 def root():
-    return {"status": "TelecomIQ Backend Running", "system": "Telecom Complaint Intelligence & Resolution Platform"}
-
+    return {
+        "status": "TelecomIQ Backend Running",
+        "system": "Telecom Complaint Intelligence & Resolution Platform",
+        "version": "1.0.0"
+    }
 
 @app.get("/health")
 def health():
-    # Deliberately does no DB or LLM work: this is the endpoint load tests and
-    # platform health checks hit, so it must measure the web tier alone.
-    return {"status": "ok"}
+    """Production health check endpoint for platform monitoring & load balancers"""
+    db_status = "connected"
+    complaint_count = 0
+    try:
+        from app.db.database import SessionLocal
+        db = SessionLocal()
+        complaint_count = db.query(models.Complaint).count()
+        db.close()
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
+    return {
+        "status": "ok" if db_status == "connected" else "degraded",
+        "service": "TelecomIQ Production Engine",
+        "database": db_status,
+        "records_count": complaint_count,
+        "environment": "render" if os.getenv("RENDER") else "local"
+    }

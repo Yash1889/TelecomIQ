@@ -5,10 +5,7 @@ import subprocess
 import sys
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BACKEND_DIR = os.path.join(BASE_DIR, "backend")
-
-if os.path.exists(BACKEND_DIR):
-    os.chdir(BACKEND_DIR)
+os.chdir(BASE_DIR)
 
 # Render & cloud platforms use 0.0.0.0 and a provided $PORT
 host = os.getenv("HOST", "0.0.0.0")
