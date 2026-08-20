@@ -1,7 +1,6 @@
 # Use official Node image
-FROM node:18-slim AS build
+FROM node:18-alpine
 
-# Set working directory
 WORKDIR /app
 
 # Copy package files and install dependencies
@@ -12,12 +11,10 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Use Nginx to serve the build
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install lightweight static server
+RUN npm install -g serve
 
-# Expose port
-EXPOSE 80
+# Expose Vite preview/serve port
+EXPOSE 5173
 
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "5173"]
