@@ -7,7 +7,6 @@ export default function ComplaintForm({ onResult, user }) {
   const [formData, setFormData] = useState({
     name: user?.full_name || "",
     email: user?.email || "",
-    category: "Network Connectivity",
     subject: "",
     description: ""
   });
@@ -18,20 +17,6 @@ export default function ComplaintForm({ onResult, user }) {
   const [rating, setRating] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [ticketId, setTicketId] = useState("");
-
-  const categories = [
-    "Network Connectivity",
-    "Broadband Performance",
-    "Call Drops",
-    "Service Outage",
-    "Billing Dispute",
-    "Data / Usage Issue",
-    "Installation",
-    "Equipment / Router",
-    "Service Request",
-    "Cancellation",
-    "Customer Service"
-  ];
 
   const presets = [
     {
@@ -69,7 +54,6 @@ export default function ComplaintForm({ onResult, user }) {
   const applyPreset = (p) => {
     setFormData(prev => ({
       ...prev,
-      category: p.cat,
       subject: p.sub,
       description: p.desc
     }));
@@ -135,7 +119,6 @@ export default function ComplaintForm({ onResult, user }) {
       setFormData({
         name: user?.full_name || "",
         email: user?.email || "",
-        category: "Network Connectivity",
         subject: "",
         description: ""
       });
@@ -189,7 +172,7 @@ export default function ComplaintForm({ onResult, user }) {
 
       <div className="form-header">
         <h2>📶 Telecom Complaint Intelligence Portal</h2>
-        <p>Submit network, broadband, billing or operational issues for automated AI resolution.</p>
+        <p>Describe your issue below. The AI pipeline will automatically classify the category, detect sentiment, score escalation risk, and generate a resolution.</p>
       </div>
 
       {/* Quick Telecom Preset Chips */}
@@ -225,13 +208,6 @@ export default function ComplaintForm({ onResult, user }) {
             <label>Subscriber Email *</label>
             <input type="email" name="email" value={formData.email} onChange={handleChange} className="form-input" disabled={loading} required />
           </div>
-        </div>
-
-        <div className="form-group">
-          <label>Telecom Domain Category *</label>
-          <select name="category" value={formData.category} onChange={handleChange} className="form-select" disabled={loading}>
-            {categories.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
         </div>
 
         <div className="form-group">
