@@ -241,10 +241,17 @@ export default function AgentModule({ user, onNavigate }) {
                         </select>
                         <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
                             <option value="">All Categories</option>
-                            <option value="Technical">Technical</option>
-                            <option value="Billing">Billing</option>
-                            <option value="Delivery">Delivery</option>
-                            <option value="Service">Service</option>
+                            <option value="Network Connectivity">Network Connectivity</option>
+                            <option value="Broadband Performance">Broadband Performance</option>
+                            <option value="Call Drops">Call Drops</option>
+                            <option value="Service Outage">Service Outage</option>
+                            <option value="Billing Dispute">Billing Dispute</option>
+                            <option value="Data / Usage Issue">Data / Usage Issue</option>
+                            <option value="Installation">Installation</option>
+                            <option value="Equipment / Router">Equipment / Router</option>
+                            <option value="Service Request">Service Request</option>
+                            <option value="Cancellation">Cancellation</option>
+                            <option value="Customer Service">Customer Service</option>
                         </select>
                     </div>
                 </div>

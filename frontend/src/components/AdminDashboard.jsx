@@ -191,18 +191,13 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
     );
 
     // Stats
+    const TELECOM_CATS = ["Network Connectivity","Broadband Performance","Call Drops","Service Outage","Billing Dispute","Data / Usage Issue","Installation","Equipment / Router","Service Request","Cancellation","Customer Service"];
     const stats = {
         total: complaints.length,
         resolved: complaints.filter(c => c.is_resolved).length,
         pending: complaints.filter(c => !c.is_resolved).length,
-        high: complaints.filter(c => c.priority === "High").length,
-        categories: {
-            Technical: complaints.filter(c => c.category === "Technical").length,
-            Billing: complaints.filter(c => c.category === "Billing").length,
-            Delivery: complaints.filter(c => c.category === "Delivery").length,
-            Service: complaints.filter(c => c.category === "Service").length,
-            Security: complaints.filter(c => c.category === "Security").length,
-        }
+        high: complaints.filter(c => { const p=(c.priority||"").toUpperCase(); return p==="HIGH"||p==="CRITICAL"||p.includes("P1")||p.includes("P2"); }).length,
+        categories: Object.fromEntries(TELECOM_CATS.map(k => [k, complaints.filter(c => c.category === k).length]))
     };
 
     const formatDate = (dateString) => {

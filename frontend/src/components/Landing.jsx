@@ -339,95 +339,96 @@ export default function Landing({ user, onStart, onNavigate }) {
 
   const features = [
     {
-      icon: "📊",
-      title: "Smart Classification",
-      description: "Automatically categorizes complaints into Billing, Technical, Delivery, Service, and Security with high accuracy.",
+      icon: "📂",
+      title: "Complaint Classification",
+      description: "Automatically classifies telecom complaints into 12 categories: Network Connectivity, Broadband Performance, Call Drops, Billing Dispute, and more.",
       color: "#667eea",
       details: [
-        "AI-driven categorization engine with surgical precision.",
-        "Automated tagging for instant department routing.",
-        "98% accuracy matching historical records and patterns.",
-        "Dynamic category expansion based on emerging trends."
-      ]
-    },
-    {
-      icon: "⚡",
-      title: "Priority Detection",
-      description: "Instantly identifies urgent issues and escalates critical complaints to human support immediately.",
-      color: "#22c55e",
-      details: [
-        "Real-time urgency scoring for every incoming ticket.",
-        "Contextual escalation for high-value enterprise cases.",
-        "Automated SLA monitoring and priority weighting.",
-        "Smart alerts for multi-agent intervention triggers."
+        "TF-IDF + Logistic Regression model trained on 2,200+ real Kaggle complaints.",
+        "89.1% test accuracy on held-out unseen data.",
+        "12 canonical telecom categories with confidence scoring.",
+        "Keyword-heuristic fallback when ML confidence is low."
       ]
     },
     {
       icon: "😊",
       title: "Sentiment Analysis",
-      description: "Analyzes customer emotions to gauge satisfaction levels and emotional context accurately.",
+      description: "Detects customer emotion from complaint text — Positive, Neutral, Negative — using VADER and TextBlob with compound polarity scoring.",
       color: "#ec4899",
       details: [
-        "Deep emotional context extraction from text and tone.",
-        "Real-time CSAT (Customer Satisfaction) trend monitoring.",
-        "Escalation of frustrated users to specialized empathy agents.",
-        "Comprehensive tone consistency reports for brand voice."
+        "VADER SentimentIntensityAnalyzer for compound score (-1 to +1).",
+        "TextBlob polarity as secondary validation layer.",
+        "Four output labels: Positive, Neutral, Negative, Angry.",
+        "Real-time confidence percentage per prediction."
       ]
     },
     {
-      icon: "💡",
-      title: "Solution Suggestions",
-      description: "Generates intelligent, actionable solutions tailored to each unique complaint type and context.",
+      icon: "⚡",
+      title: "Priority & Escalation Prediction",
+      description: "Scores every complaint across 5 risk factors and assigns CRITICAL / HIGH / MEDIUM / LOW priority with explainable escalation reasons.",
+      color: "#22c55e",
+      details: [
+        "Category impact scoring — outage and cancellation weighted highest.",
+        "Sentiment intensity factor — negative sentiment raises risk score.",
+        "Repeated complaint and SLA breach keyword detection.",
+        "Legal/regulatory indicator detection (TRAI, FCC, consumer court).",
+        "Automatic escalation flag when risk score ≥ 60%."
+      ]
+    },
+    {
+      icon: "🛠️",
+      title: "Resolution Recommendation",
+      description: "GenAI triage assistant generates a 4-step technical resolution plan grounded in telecom SOP knowledge for every classified complaint.",
       color: "#3b82f6",
       details: [
-        "LLM-powered draft responses tailored to specific issues.",
-        "Knowledge Base (KB) cross-referencing for verified facts.",
-        "Actionable multi-step resolutions for recurring problems.",
-        "Tone-optimized templates for professional communication."
+        "Groq LLM (primary) → Gemini (fallback) → SOP template (offline fallback).",
+        "Resolution grounded in 11 domain SOP documents per category.",
+        "SLA target embedded in every resolution (2h–24h based on priority).",
+        "Professional customer-facing response generated alongside internal plan."
       ]
     },
     {
-      icon: "🎯",
-      title: "Satisfaction Prediction",
-      description: "Predicts customer satisfaction with proposed resolutions using advanced ML algorithms.",
+      icon: "📋",
+      title: "Automatic Ticket Summary",
+      description: "Generates a concise 2-sentence internal operational summary of the complaint and its risk level for agent dashboards.",
       color: "#764ba2",
       details: [
-        "Proprietary ML algorithms for predicting outcome success.",
-        "Resolution effectiveness forecasting before sending.",
-        "Proactive adjustment suggestions to maximize CSAT.",
-        "Continuous feedback loop integration for self-healing."
+        "Summarises category, sentiment, priority, and escalation risk in plain language.",
+        "Produced by the same GenAI triage call as the resolution.",
+        "Stored in the database and visible to admin and support agents.",
+        "Reduces manual ticket documentation effort to zero."
       ]
     },
     {
       icon: "🔍",
-      title: "Pattern Recognition",
-      description: "Finds similar past complaints to ensure consistent and reliable handling of issues.",
+      title: "Vector DB + RAG Retrieval",
+      description: "Retrieves top-3 similar historical complaints and domain SOP context using TF-IDF cosine similarity before generating any response.",
       color: "#14b8a6",
       details: [
-        "Global historical trend identification across data silos.",
-        "Instant duplicate detection and resolution linking.",
-        "Root cause analysis for systematic organizational issues.",
-        "Automatic knowledge base optimization and updates."
+        "Vector index built over 2,200+ historical Kaggle telecom complaints.",
+        "Cosine similarity search returns similarity percentage per match.",
+        "RAG over 11 telecom SOP documents (one per complaint category).",
+        "Retrieved context is injected into the GenAI triage prompt for grounding."
       ]
     }
   ];
 
   const faqs = [
     {
-      question: "How does the multi-agent system work?",
-      answer: "Quickfix uses a specialized cluster of AI agents. Each agent handles a specific task—like sentiment analysis or classification—and they cross-communicate to ensure the final resolution is accurate and context-aware."
+      question: "What does the LangGraph pipeline do?",
+      answer: "LangGraph orchestrates the complaint analysis as a directed StateGraph with 7 sequential nodes: input validation → classification → sentiment → priority/escalation → vector similarity search → RAG knowledge retrieval → GenAI triage. Each node writes its output to a shared state that the next node reads from."
     },
     {
-      question: "Is my data secure?",
-      answer: "Absolutely. We use enterprise-grade AES-256 encryption for all data at rest and in transit. Your complaints and customer details are never used for training public models."
+      question: "How accurate is the complaint classifier?",
+      answer: "The TF-IDF + Logistic Regression model was trained on 2,204 real telecom complaints from the Kaggle ravillatejakumar dataset with a 70/15/15 train/validation/test split. It achieved 89.1% test accuracy and 0.89 weighted F1-score on the unseen held-out test set."
     },
     {
-      question: "Can I integrate this with my existing CRM?",
-      answer: "Yes, Quickfix is designed with an API-first approach, allowing seamless integration with popular CRMs like Salesforce, HubSpot, and Zendesk."
+      question: "What telecom complaint categories are supported?",
+      answer: "12 canonical categories: Network Connectivity, Broadband Performance, Call Drops, Service Outage, Billing Dispute, Data/Usage Issue, Installation, Equipment/Router, Service Request, Cancellation, Customer Service, and Other. These match the Kaggle dataset and the official telecom complaint taxonomy."
     },
     {
-      question: "What is the accuracy rate of the AI?",
-      answer: "Currently, our agentic orchestration performs with a 98% surgical precision in classification and a 95% success rate in suggested resolutions."
+      question: "How does the GenAI triage assistant work?",
+      answer: "After classification, sentiment, and priority are computed, a Groq LLM (Qwen/Llama) generates a 4-step technical resolution plan and ticket summary grounded in the retrieved SOP context. Gemini is used as fallback, and hardcoded SOP templates are the final fallback if all APIs are unavailable."
     }
   ];
 
@@ -510,7 +511,7 @@ export default function Landing({ user, onStart, onNavigate }) {
           </h1>
 
           <p className="hero-subtitle">
-            Grounding local ML classification, multi-factor escalation risk assessment, and RAG knowledge retrieval for seamless customer operations.
+            An AI-powered complaint intelligence platform that automatically classifies telecom complaints, detects customer sentiment, predicts escalation risks, and provides recommended resolutions to improve customer experience and operational efficiency.
           </p>
 
           <div className="hero-cta">
@@ -525,19 +526,19 @@ export default function Landing({ user, onStart, onNavigate }) {
           <div className="features-grid-mini">
             <div className="feature-mini">
               <span className="icon">🧠</span>
-              <span>Recursive Reasoning</span>
+              <span>BERT / DistilBERT</span>
             </div>
             <div className="feature-mini">
-              <span className="icon">🛡️</span>
-              <span>Kernel Security</span>
+              <span className="icon">🔗</span>
+              <span>LangGraph Agents</span>
             </div>
             <div className="feature-mini">
               <span className="icon">📈</span>
-              <span>Predictive Resolve</span>
+              <span>Escalation Prediction</span>
             </div>
             <div className="feature-mini">
-              <span className="icon">⚡</span>
-              <span>Atomic Latency</span>
+              <span className="icon">🗄️</span>
+              <span>Vector DB + RAG</span>
             </div>
           </div>
         </div>
@@ -582,8 +583,8 @@ export default function Landing({ user, onStart, onNavigate }) {
       {/* Features Section */}
       <section className="solutions-section" id="features">
         <div className="section-header">
-          <h2 className="section-title">About <span>Quickfix</span></h2>
-          <p className="section-subtitle">Six specialized agents working in high-frequency synchronization.</p>
+          <h2 className="section-title">About <span>TelecomIQ</span></h2>
+          <p className="section-subtitle">Six core AI capabilities working together in the complaint intelligence pipeline.</p>
         </div>
 
         <div className="solutions-grid">
@@ -636,45 +637,45 @@ export default function Landing({ user, onStart, onNavigate }) {
       <section className="goals-section" id="goals">
         <div className="section-header">
           <h2 className="section-title">Strategic <span>Goals</span></h2>
-          <p className="section-subtitle">Our mission: Redefining the future of autonomous support.</p>
+          <p className="section-subtitle">What the TelecomIQ pipeline delivers — by the numbers.</p>
         </div>
         <div className="goals-grid">
           {[
             {
-              title: "Absolute Efficiency",
-              desc: "Reducing resolution cycles from days to seconds using high-frequency agentic reasoning.",
-              icon: "🚀",
-              metric: "< 2s Response"
+              title: "Classification Accuracy",
+              desc: "TF-IDF + Logistic Regression model trained on 2,204 real telecom complaints, achieving 89.1% test accuracy with 0.89 weighted F1-score.",
+              icon: "🎯",
+              metric: "89.1% Test Accuracy"
             },
             {
-              title: "User Empowerment",
-              desc: "Giving every user a transparent, AI-backed voice that ensures fair and consistent resolution.",
-              icon: "⚖️",
-              metric: "100% Transparency"
+              title: "Real-Time Analysis",
+              desc: "LangGraph pipeline processes complaint text through 7 sequential nodes — classification, sentiment, priority, vector search, RAG, and GenAI — in a single request.",
+              icon: "⚡",
+              metric: "7-Node Pipeline"
             },
             {
-              title: "Emotional Resonance",
-              desc: "Deploying sentiment-aware agents that understand the human context behind every complaint.",
+              title: "Escalation Intelligence",
+              desc: "Multi-factor risk scoring across category severity, sentiment intensity, repeated-complaint signals, outage indicators, and regulatory keywords.",
               icon: "🧠",
-              metric: "99% Empathy Rate"
+              metric: "5-Factor Scoring"
             },
             {
-              title: "Seamless Scaling",
-              desc: "Architecture designed to handle millions of concurrent resolutions without degradation.",
-              icon: "📈",
-              metric: "Infinite Scale"
+              title: "Vector Retrieval",
+              desc: "Cosine similarity search over 2,200+ historical complaint vectors returns top-3 matching tickets with percentage match scores.",
+              icon: "🗄️",
+              metric: "2,200+ Indexed Tickets"
             },
             {
-              title: "Recursive Intelligence",
-              desc: "Internal feedback loops allow our agents to learn and adapt from every single interaction.",
-              icon: "🔄",
-              metric: "Self-Learning"
+              title: "RAG Knowledge Base",
+              desc: "11 domain-specific SOP documents — one per complaint category — retrieved by TF-IDF similarity and injected into the GenAI prompt for grounded resolutions.",
+              icon: "📚",
+              metric: "11 Telecom SOPs"
             },
             {
-              title: "Enterprise Security",
-              desc: "Kernel-level protection ensuring all data remains encrypted and isolated within your ecosystem.",
-              icon: "🛡️",
-              metric: "Zero-Risk Policy"
+              title: "BERT / DistilBERT",
+              desc: "DistilBERT (40% smaller than BERT, 97% performance retained) available as offline sentiment fallback. BART-large-mnli for zero-shot classification fallback.",
+              icon: "🤖",
+              metric: "Offline DL Fallback"
             }
           ].map((goal, idx) => (
             <div key={idx} className="goal-card">
@@ -698,40 +699,40 @@ export default function Landing({ user, onStart, onNavigate }) {
       {/* Demo Solutions */}
       <section className="demo-section" id="solutions-demo">
         <div className="section-header">
-          <h2 className="section-title">Intelligence <span>In Action</span></h2>
-          <p className="section-subtitle">Real-world scenarios handled by our multi-agent architecture.</p>
+          <h2 className="section-title">Pipeline <span>In Action</span></h2>
+          <p className="section-subtitle">How the LangGraph complaint intelligence pipeline handles real telecom scenarios.</p>
         </div>
 
         <div className="demo-container">
           {[
             {
-              type: "Billing",
-              case: "Unexpected Overcharge",
-              process: "Agent identifies billing error → Cross-references history → Generates refund proposal → Alerts Team.",
-              impact: "Reduction in resolution time",
-              icon: "💳",
+              title: "Broadband Disconnect",
+              case: "Fiber Connection Dropped Every 30 Minutes",
+              process: "LangGraph classifies → Broadband Performance detected → Negative sentiment → HIGH priority → RAG retrieves OLT diagnostic SOP → GenAI generates 4-step resolution plan.",
+              impact: "Resolution in under 2 seconds",
+              icon: "📡",
               color: "rgba(99, 102, 241, 0.15)"
             },
             {
-              type: "Technical",
-              case: "System Latency Issue",
-              process: "Monitors logs → Classifies root cause → Provides troubleshooting steps → Predicts fix probability.",
-              impact: "Approx surgical accuracy",
-              icon: "⚙️",
+              title: "Billing Dispute",
+              case: "Unauthorized VAS Charge on Monthly Bill",
+              process: "TF-IDF classifier → Billing Dispute (90% confidence) → VADER detects Negative sentiment → Escalation risk 60% → RAG retrieves VAS deactivation SOP → GenAI drafts refund action plan.",
+              impact: "Ticket summary auto-generated",
+              icon: "💳",
               color: "rgba(34, 197, 94, 0.15)"
             },
             {
-              type: "Security",
-              case: "Suspicious Login Attempt",
-              process: "Detects anomaly → Triggers immediate lockdown → Notifies security agents → Initiates identity verification.",
-              impact: "Real-time threat mitigation",
-              icon: "🛡️",
+              title: "Service Outage",
+              case: "Complete Network Blackout in Residential Area",
+              process: "Keyword heuristic → Service Outage → CRITICAL priority (risk 95%) → Escalation required → Vector DB finds 3 similar past outage tickets → NOC escalation plan generated.",
+              impact: "Automatic escalation to NOC",
+              icon: "🚨",
               color: "rgba(239, 68, 68, 0.15)"
             }
           ].map((demo, idx) => (
             <div key={idx} className="demo-scenario-card" style={{ '--demo-accent': demo.color }}>
               <div className="demo-card-head">
-                <span className="demo-type-badge">{demo.type}</span>
+                <span className="demo-type-badge">{demo.title}</span>
                 <span className="demo-icon-mini">{demo.icon}</span>
               </div>
               <h4>{demo.case}</h4>

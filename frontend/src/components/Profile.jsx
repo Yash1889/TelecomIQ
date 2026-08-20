@@ -155,14 +155,22 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
     const totalComplaints = complaintsList.length;
     const resolvedComplaints = complaintsList.filter(c => c.is_resolved).length;
     const pendingComplaints = totalComplaints - resolvedComplaints;
-    const highPriorityCount = complaintsList.filter(c => c.priority === "High").length;
+    const highPriorityCount = complaintsList.filter(c => {
+        const p = (c.priority || "").toUpperCase();
+        return p === "HIGH" || p === "CRITICAL" || p.includes("P1") || p.includes("P2");
+    }).length;
 
-    const categories = { Billing: 0, Technical: 0, Delivery: 0, Service: 0, Security: 0, Other: 0 };
+    const TELECOM_CATEGORIES = [
+        "Network Connectivity", "Broadband Performance", "Call Drops", "Service Outage",
+        "Billing Dispute", "Data / Usage Issue", "Installation", "Equipment / Router",
+        "Service Request", "Cancellation", "Customer Service"
+    ];
+    const categories = Object.fromEntries([...TELECOM_CATEGORIES, "Other"].map(k => [k, 0]));
     complaintsList.forEach(c => {
-        if (Object.prototype.hasOwnProperty.call(categories, c.category)) {
+        if (TELECOM_CATEGORIES.includes(c.category)) {
             categories[c.category]++;
         } else {
-            categories.Other++;
+            categories["Other"]++;
         }
     });
 

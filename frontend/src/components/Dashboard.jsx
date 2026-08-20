@@ -16,12 +16,18 @@ export default function Dashboard({ onNavigate, onLogout, user, complaints = [],
   });
 
   const [categoryBreakdown, setCategoryBreakdown] = useState({
-    Billing: 0,
-    Technical: 0,
-    Delivery: 0,
-    Service: 0,
-    Security: 0,
-    Other: 0
+    "Network Connectivity": 0,
+    "Broadband Performance": 0,
+    "Call Drops": 0,
+    "Service Outage": 0,
+    "Billing Dispute": 0,
+    "Data / Usage Issue": 0,
+    "Installation": 0,
+    "Equipment / Router": 0,
+    "Service Request": 0,
+    "Cancellation": 0,
+    "Customer Service": 0,
+    "Other": 0
   });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -57,15 +63,23 @@ export default function Dashboard({ onNavigate, onLogout, user, complaints = [],
 
   useEffect(() => {
     if (complaints.length > 0) {
-      const highCount = complaints.filter(c => c.priority === "High").length;
+      const highCount = complaints.filter(c => {
+        const p = (c.priority || "").toUpperCase();
+        return p === "HIGH" || p === "CRITICAL" || p === "P1 - CRITICAL" || p === "P2 - HIGH";
+      }).length;
       const resolvedCount = complaints.filter(c => c.is_resolved).length;
-      const categories = { Billing: 0, Technical: 0, Delivery: 0, Service: 0, Security: 0, Other: 0 };
+      const TELECOM_CATEGORIES = [
+        "Network Connectivity", "Broadband Performance", "Call Drops", "Service Outage",
+        "Billing Dispute", "Data / Usage Issue", "Installation", "Equipment / Router",
+        "Service Request", "Cancellation", "Customer Service"
+      ];
+      const categories = Object.fromEntries([...TELECOM_CATEGORIES, "Other"].map(k => [k, 0]));
 
       complaints.forEach(c => {
-        if (categories.hasOwnProperty(c.category)) {
+        if (TELECOM_CATEGORIES.includes(c.category)) {
           categories[c.category]++;
         } else {
-          categories.Other++;
+          categories["Other"]++;
         }
       });
 
@@ -253,19 +267,25 @@ export default function Dashboard({ onNavigate, onLogout, user, complaints = [],
             <div className="priority-grid">
               <div className="priority-item high">
                 <div className="priority-circle">
-                  <span>{complaints.filter(c => c.priority === "High").length}</span>
+                  <span>{complaints.filter(c => { const p=(c.priority||"").toUpperCase(); return p==="CRITICAL"||p.includes("P1"); }).length}</span>
+                </div>
+                <p>Critical</p>
+              </div>
+              <div className="priority-item high">
+                <div className="priority-circle">
+                  <span>{complaints.filter(c => { const p=(c.priority||"").toUpperCase(); return p==="HIGH"||p.includes("P2"); }).length}</span>
                 </div>
                 <p>High</p>
               </div>
               <div className="priority-item medium">
                 <div className="priority-circle">
-                  <span>{complaints.filter(c => c.priority === "Medium").length}</span>
+                  <span>{complaints.filter(c => { const p=(c.priority||"").toUpperCase(); return p==="MEDIUM"||p.includes("P3"); }).length}</span>
                 </div>
                 <p>Medium</p>
               </div>
               <div className="priority-item low">
                 <div className="priority-circle">
-                  <span>{complaints.filter(c => c.priority === "Low").length}</span>
+                  <span>{complaints.filter(c => { const p=(c.priority||"").toUpperCase(); return p==="LOW"||p.includes("P4"); }).length}</span>
                 </div>
                 <p>Low</p>
               </div>
