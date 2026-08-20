@@ -37,6 +37,7 @@ class ComplaintResponse(BaseModel):
     keywords: Optional[Dict[str, Any]] = {}
     speaker_analysis: Optional[Dict[str, Any]] = {}
     time_segmentation: Optional[Dict[str, Any]] = {}
+    compliance_analysis: Optional[Dict[str, Any]] = {}
 
 class ComplaintDB(BaseModel):
     """Database schema for storing complaint"""

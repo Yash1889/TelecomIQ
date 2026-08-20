@@ -24,7 +24,8 @@ export default function ComplaintCard({ data }) {
     action,
     similar_issues = [],
     kb_sources = [],
-    steps = []
+    steps = [],
+    compliance_analysis = {}
   } = data;
 
   const handleCopyTicket = () => {
@@ -51,6 +52,22 @@ export default function ComplaintCard({ data }) {
   };
 
   const prioStyle = getPriorityStyle(priority);
+
+  // ── Compliance helpers ────────────────────────────────────────────────── //
+  const getRiskStyle = (level) => {
+    switch ((level || "").toUpperCase()) {
+      case "CRITICAL": return { bg: "rgba(220,38,38,0.08)",  border: "rgba(220,38,38,0.35)",  text: "#dc2626", icon: "🚨" };
+      case "HIGH":     return { bg: "rgba(234,88,12,0.08)",  border: "rgba(234,88,12,0.35)",  text: "#ea580c", icon: "⚠️" };
+      case "MEDIUM":   return { bg: "rgba(202,138,4,0.08)",  border: "rgba(202,138,4,0.35)",  text: "#ca8a04", icon: "🔔" };
+      case "LOW":      return { bg: "rgba(37,99,235,0.06)",  border: "rgba(37,99,235,0.25)",  text: "#2563eb", icon: "ℹ️" };
+      default:         return { bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.25)", text: "#059669", icon: "✅" };
+    }
+  };
+
+  const ca = compliance_analysis || {};
+  const riskLevel = ca.risk_level || "CLEAR";
+  const riskStyle = getRiskStyle(riskLevel);
+  const showCompliance = Object.keys(ca).length > 0;
 
   if (data.is_sufficient === false) {
     return (
@@ -184,6 +201,65 @@ export default function ComplaintCard({ data }) {
       {kb_sources && kb_sources.length > 0 && (
         <div style={{ marginTop: "1rem", fontSize: "0.8rem", opacity: 0.7, borderTop: "1px dashed rgba(100, 116, 139, 0.3)", paddingTop: "0.5rem" }}>
           📚 Grounded Knowledge SOP Sources: {kb_sources.join(" | ")}
+        </div>
+      )}
+
+      {/* ── Compliance & Privacy Status ────────────────────────────── */}
+      {showCompliance && (
+        <div style={{
+          marginTop: "1.2rem",
+          padding: "0.9rem 1rem",
+          borderRadius: "8px",
+          background: riskStyle.bg,
+          border: `1px solid ${riskStyle.border}`,
+        }}>
+          {/* Header row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.75rem" }}>
+            <h4 style={{ margin: 0, fontSize: "0.95rem", color: riskStyle.text, display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              {riskStyle.icon} Compliance & Privacy Status
+            </h4>
+            <span style={{
+              padding: "0.2rem 0.65rem", borderRadius: "10px", fontWeight: 700, fontSize: "0.8rem",
+              background: riskStyle.border, color: riskStyle.text,
+            }}>
+              Risk: {riskLevel}
+            </span>
+          </div>
+
+          {/* 2-col grid of key facts */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.5rem", fontSize: "0.82rem", marginBottom: "0.7rem" }}>
+            <div>
+              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>PII Detected</span>
+              <div style={{ fontWeight: 700, color: ca.pii_detected ? "#dc2626" : "#059669" }}>
+                {ca.pii_detected ? `Yes — ${(ca.pii_types || []).join(", ")}` : "None"}
+              </div>
+            </div>
+            <div>
+              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Policy Flags</span>
+              <div style={{ fontWeight: 700, color: ca.policy_violation ? "#dc2626" : "#059669" }}>
+                {ca.policy_violation ? (ca.compliance_flags || []).join(", ") : "None"}
+              </div>
+            </div>
+            <div>
+              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Sensitive Content</span>
+              <div style={{ fontWeight: 700, color: ca.sensitive_content ? "#ea580c" : "#059669" }}>
+                {ca.sensitive_content ? (ca.compliance_flags || []).join(", ") : "None"}
+              </div>
+            </div>
+            <div>
+              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Recommended Action</span>
+              <div style={{ fontWeight: 700, color: riskStyle.text }}>
+                {(ca.compliance_action || "NO_ACTION_REQUIRED").replaceAll("_", " ")}
+              </div>
+            </div>
+          </div>
+
+          {/* Recommended actions list */}
+          {ca.recommended_actions && ca.recommended_actions.length > 0 && !(ca.recommended_actions[0].includes("No compliance action")) && (
+            <ul style={{ margin: "0.4rem 0 0 1.1rem", padding: 0, fontSize: "0.82rem", lineHeight: 1.6 }}>
+              {ca.recommended_actions.map((r, i) => <li key={i}>{r}</li>)}
+            </ul>
+          )}
         </div>
       )}
     </div>

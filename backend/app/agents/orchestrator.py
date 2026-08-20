@@ -9,11 +9,13 @@ from app.agents.complaint_matcher import find_similar_complaints
 from app.services.rag_engine import rag_engine
 from app.agents.gemini_client import async_ask_ai
 
-# ── New NLP metadata extraction agents ────────────────────────────────────── #
+# ── NLP metadata extraction agents ───────────────────────────────────────── #
 from app.agents.ner_extractor import extract_entities
 from app.agents.keyword_extractor import extract_keywords
 from app.agents.speaker_identifier import identify_speakers
 from app.agents.time_segmenter import segment_by_time
+# ── Compliance & Privacy Monitoring ──────────────────────────────────────── #
+from app.agents.compliance_monitor import run_compliance_check
 
 async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     """
@@ -50,6 +52,7 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
             "keywords":          {},
             "speaker_analysis":  {},
             "time_segmentation": {},
+            "compliance_analysis": {},
         }
 
     # 2. Local ML Classification & VADER Sentiment Analysis
@@ -77,12 +80,13 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     kb_sources = rag_res["sources"]
 
     # 6. NLP Metadata Extraction (NER, Keywords, Speaker ID, Time Segmentation)
-    #    Run all four in parallel to keep latency minimal
-    ner_res, kw_res, speaker_res, time_res = await asyncio.gather(
+    #    + Compliance & Privacy Monitoring — all run in parallel
+    ner_res, kw_res, speaker_res, time_res, compliance_res = await asyncio.gather(
         extract_entities(text),
         extract_keywords(text, top_n=10),
         identify_speakers(text),
         segment_by_time(text),
+        run_compliance_check(text),
         return_exceptions=True,
     )
     # Gracefully handle any individual agent failure
@@ -98,6 +102,9 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     if isinstance(time_res, Exception):
         print(f"⚠️  Time segmenter error: {time_res}")
         time_res = {}
+    if isinstance(compliance_res, Exception):
+        print(f"⚠️  Compliance monitor error: {compliance_res}")
+        compliance_res = {}
 
     # Target SLA calculation
     sla_hours = 2 if priority == "CRITICAL" else (6 if priority == "HIGH" else (12 if priority == "MEDIUM" else 24))
@@ -163,6 +170,7 @@ Return EXACT JSON format with these exact keys:
         {"step": "Keyword Extraction", "status": f"Keywords: {keyword_summary}"},
         {"step": "Speaker Identification", "status": f"Format: {speaker_res.get('transcript_format','N/A')} | Speakers: {', '.join(speaker_res.get('speakers', ['Customer']))}"},
         {"step": "Time Segmentation", "status": f"Segments: {time_res.get('total_segments', 1)} | {time_summary[:80]}"},
+        {"step": "Compliance Monitor", "status": f"Risk: {compliance_res.get('risk_level','N/A')} | PII: {compliance_res.get('pii_types',[])} | Flags: {compliance_res.get('compliance_flags',[])}"},
         {"step": "Resolution & Response", "status": "Grounded resolution recommendation generated"}
     ]
 
@@ -185,9 +193,11 @@ Return EXACT JSON format with these exact keys:
         "kb_sources": kb_sources,
         "steps": steps,
         "is_anomaly": escalation_required,
-        # ── New NLP metadata ────────────────────────────────────────────── #
+        # ── NLP metadata ────────────────────────────────────────────── #
         "named_entities":    ner_res,
         "keywords":          kw_res,
         "speaker_analysis":  speaker_res,
         "time_segmentation": time_res,
+        # ── Compliance & Privacy ─────────────────────────────────────── #
+        "compliance_analysis": compliance_res,
     }
