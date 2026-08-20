@@ -25,5 +25,7 @@ vaderSentiment>=3.3.2
 kagglehub>=0.2.0
 textblob>=0.17.0,<1.0.0
 sqlalchemy-libsql>=0.2.0
+# Agentic orchestration — LangGraph (spec requirement 10)
+langgraph>=0.2.0
 # sentence-transformers kept for semantic_search.py (existing infrastructure)
 sentence-transformers>=2.2.0
