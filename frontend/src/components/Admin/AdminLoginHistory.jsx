@@ -82,7 +82,7 @@ export default function AdminLoginHistory() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `quickfix-login-audit-${new Date().toISOString().split('T')[0]}.csv`;
+        a.download = `telecomiq-login-audit-${new Date().toISOString().split('T')[0]}.csv`;
         a.click();
         window.URL.revokeObjectURL(url);
     };
@@ -215,11 +215,11 @@ export default function AdminLoginHistory() {
                 doc.setTextColor(148, 163, 184);
                 doc.line(14, doc.internal.pageSize.height - 15, pageWidth - 14, doc.internal.pageSize.height - 15);
                 doc.text(str, 14, doc.internal.pageSize.height - 10);
-                doc.text('© 2026 Quickfix AI - Confidential Security Audit Log', pageWidth - 14, doc.internal.pageSize.height - 10, { align: 'right' });
+                doc.text('© 2026 TelecomIQ - Confidential Security Audit Log', pageWidth - 14, doc.internal.pageSize.height - 10, { align: 'right' });
             }
         });
 
-        doc.save(`quickfix-login-audit-${new Date().toISOString().split('T')[0]}.pdf`);
+        doc.save(`telecomiq-login-audit-${new Date().toISOString().split('T')[0]}.pdf`);
     };
 
     const getMethodBadgeClass = (method) => {

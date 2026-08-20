@@ -110,7 +110,7 @@ const TermsModal = ({ isOpen, onClose, onAccept, initialTab = "terms" }) => {
                                 <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
                                     <section>
                                         <h4>1. Acceptance of Terms</h4>
-                                        <p>By creating an account on the Quickfix AI platform, you agree to abide by these Terms of Service. This platform is designed for legitimate complaint registration and resolution. Any misuse, including harassment or false reporting, will result in immediate account termination.</p>
+                                        <p>By creating an account on the TelecomIQ platform, you agree to abide by these Terms of Service. This platform is designed for legitimate complaint registration and resolution. Any misuse, including harassment or false reporting, will result in immediate account termination.</p>
                                     </section>
                                     <section>
                                         <h4>2. User Responsibilities</h4>
@@ -133,7 +133,7 @@ const TermsModal = ({ isOpen, onClose, onAccept, initialTab = "terms" }) => {
                                     </section>
                                     <section>
                                         <h4>2. Neural Encryption</h4>
-                                        <p>All communication within the Quickfix grid is encrypted using end-to-end neural protocols. Your personal information is never exposed to external non-authorized entities.</p>
+                                        <p>All communication within the TelecomIQ platform is encrypted using end-to-end neural protocols. Your personal information is never exposed to external non-authorized entities.</p>
                                     </section>
                                     <section>
                                         <h4>3. Use of AI</h4>

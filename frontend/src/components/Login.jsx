@@ -204,7 +204,7 @@ export default function Login({ onNavigate, onLoginSuccess, isAdminMode }) {
                     const { latitude, longitude } = pos.coords;
                     try {
                         const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-                            headers: { 'User-Agent': 'QuickfixAI/1.0' }
+                            headers: { 'User-Agent': 'TelecomIQ/1.0' }
                         });
                         const geoData = await geoResponse.json();
                         if (geoData && geoData.address) {
@@ -270,7 +270,7 @@ export default function Login({ onNavigate, onLoginSuccess, isAdminMode }) {
                 const { latitude, longitude } = pos.coords;
                 try {
                     const geoResponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
-                        headers: { 'User-Agent': 'QuickfixAI/1.0' }
+                        headers: { 'User-Agent': 'TelecomIQ/1.0' }
                     });
                     const geoData = await geoResponse.json();
                     if (geoData && geoData.address) {
