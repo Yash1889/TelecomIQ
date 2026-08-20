@@ -1,6 +1,15 @@
+"""
+TelecomIQ — Core Complaint Intelligence Pipeline
+Official scope (per company use case):
+  1. Complaint category classification
+  2. Customer sentiment analysis
+  3. Priority + escalation risk prediction
+  4. Vector DB / RAG retrieval (historical complaints + SOPs)
+  5. GenAI triage assistant → resolution recommendation + ticket summary
+"""
+
 import asyncio
 import json
-import os
 from app.agents.input_validator import validate_complaint_input
 from app.agents.classifier import classify_complaint
 from app.agents.sentiment_analyzer import analyze_sentiment
@@ -9,115 +18,95 @@ from app.agents.complaint_matcher import find_similar_complaints
 from app.services.rag_engine import rag_engine
 from app.agents.gemini_client import async_ask_ai
 
-# ── NLP metadata extraction agents ───────────────────────────────────────── #
-from app.agents.ner_extractor import extract_entities
-from app.agents.keyword_extractor import extract_keywords
-from app.agents.speaker_identifier import identify_speakers
-from app.agents.time_segmenter import segment_by_time
-# ── Compliance & Privacy Monitoring ──────────────────────────────────────── #
-from app.agents.compliance_monitor import run_compliance_check
 
-async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
+async def run_agent_pipeline(text: str, user_language: str = "english") -> dict:
     """
-    TelecomIQ Orchestrated Intelligence Pipeline.
-    Evaluates input sufficiency, executes real NLP classification, VADER sentiment analysis,
-    multi-factor priority & escalation risk scoring, vector RAG search over historical complaints,
-    grounded telecom SOP recommendations, ticket summary, and customer response generation.
+    TelecomIQ end-to-end complaint analysis pipeline.
+
+    Stages
+    ------
+    1  Input sufficiency validation
+    2  ML classification (TF-IDF + LogisticRegression)  → category + confidence
+    3  VADER sentiment analysis                          → sentiment + score
+    4  Multi-factor priority & escalation scoring        → priority + escalation
+    5  Vector cosine similarity over historical corpus   → similar complaints
+    6  TF-IDF RAG over telecom SOP knowledge base        → resolution context
+    7  GenAI triage (Groq → Gemini → SOP fallback)       → resolution + summary
     """
-    # 1. Input Validity & Sufficiency Check
+
+    # ── 1. Input Validation ──────────────────────────────────────────────── #
     validation_res = validate_complaint_input(text)
     if not validation_res["is_sufficient"]:
         return {
-            "is_sufficient": False,
-            "category": "Insufficient Information",
-            "confidence": 0.0,
-            "priority": "LOW",
-            "sentiment": "Neutral",
-            "sentiment_score": 0.0,
+            "is_sufficient":       False,
+            "category":            "Insufficient Information",
+            "confidence":          0.0,
+            "priority":            "LOW",
+            "sentiment":           "Neutral",
+            "sentiment_score":     0.0,
             "escalation_required": False,
             "escalation_risk_score": 0.0,
-            "escalation_reasons": ["Input contains insufficient details to perform automated complaint analysis."],
+            "escalation_reasons":  [
+                "Input contains insufficient details to perform automated complaint analysis."
+            ],
             "ticket_summary": "Insufficient complaint information provided.",
-            "solution": "Please provide additional details regarding your issue, including affected service type, problem description, duration, and location.",
-            "response": "Hello! Thank you for contacting TelecomIQ Support. Your submission does not contain sufficient details for automated complaint classification and resolution. Please describe your issue (e.g., Broadband disconnects, Billing overcharge, Call drops), including duration and location.",
-            "action": "Awaiting Customer Details",
-            "satisfaction": "High",
+            "solution": (
+                "Please provide additional details regarding your issue, including "
+                "affected service type, problem description, duration, and location."
+            ),
+            "response": (
+                "Hello! Thank you for contacting TelecomIQ Support. Your submission "
+                "does not contain sufficient details for automated complaint "
+                "classification and resolution. Please describe your issue "
+                "(e.g. Broadband disconnects, Billing overcharge, Call drops), "
+                "including duration and location."
+            ),
+            "action":        "Awaiting Customer Details",
+            "satisfaction":  "High",
             "similar_issues": [],
-            "kb_sources": [],
+            "kb_sources":     [],
             "steps": [
                 {"step": "Input Validation", "status": "Insufficient complaint information detected"}
             ],
             "is_anomaly": False,
-            "named_entities":    {},
-            "keywords":          {},
-            "speaker_analysis":  {},
-            "time_segmentation": {},
-            "compliance_analysis": {},
         }
 
-    # 2. Local ML Classification & VADER Sentiment Analysis
-    cat_res = await classify_complaint(text)
-    category = cat_res["category"]
+    # ── 2. Classification ────────────────────────────────────────────────── #
+    cat_res      = await classify_complaint(text)
+    category     = cat_res["category"]
     cat_confidence = cat_res["confidence"]
 
-    sent_res = await analyze_sentiment(text)
-    sentiment = sent_res["sentiment"]
+    # ── 3. Sentiment Analysis ────────────────────────────────────────────── #
+    sent_res   = await analyze_sentiment(text)
+    sentiment  = sent_res["sentiment"]
     sent_score = sent_res["score"]
 
-    # 3. Multi-Factor Priority & Escalation Risk Calculation
-    priority_res = await detect_priority(text, category=category, sentiment=sentiment, is_sufficient=True)
-    priority = priority_res["priority"]
-    escalation_required = priority_res["escalation_required"]
+    # ── 4. Priority + Escalation Risk ───────────────────────────────────── #
+    priority_res       = await detect_priority(
+        text, category=category, sentiment=sentiment, is_sufficient=True
+    )
+    priority             = priority_res["priority"]
+    escalation_required  = priority_res["escalation_required"]
     escalation_risk_score = priority_res["escalation_risk_score"]
-    escalation_reasons = priority_res["escalation_reasons"]
+    escalation_reasons   = priority_res["escalation_reasons"]
 
-    # 4. Real Historical Vector Similarity Retrieval
+    # ── 5. Vector RAG — historical complaints ───────────────────────────── #
     similar_complaints = await find_similar_complaints(text, category=category, top_k=3)
 
-    # 5. Telecom Knowledge Base (RAG) SOP Retrieval
-    rag_res = rag_engine.retrieve(f"{category} {text}")
+    # ── 6. RAG — telecom SOP knowledge base ─────────────────────────────── #
+    rag_res    = rag_engine.retrieve(f"{category} {text}")
     kb_context = rag_res["context"]
     kb_sources = rag_res["sources"]
 
-    # 6. NLP Metadata Extraction (NER, Keywords, Speaker ID, Time Segmentation)
-    #    + Compliance & Privacy Monitoring — all run in parallel
-    ner_res, kw_res, speaker_res, time_res, compliance_res = await asyncio.gather(
-        extract_entities(text),
-        extract_keywords(text, top_n=10),
-        identify_speakers(text),
-        segment_by_time(text),
-        run_compliance_check(text),
-        return_exceptions=True,
+    # ── 7. GenAI Triage — resolution + ticket summary ───────────────────── #
+    sla_hours = (
+        2  if priority == "CRITICAL" else
+        6  if priority == "HIGH"     else
+        12 if priority == "MEDIUM"   else
+        24
     )
-    # Gracefully handle any individual agent failure
-    if isinstance(ner_res, Exception):
-        print(f"⚠️  NER agent error: {ner_res}")
-        ner_res = {}
-    if isinstance(kw_res, Exception):
-        print(f"⚠️  Keyword agent error: {kw_res}")
-        kw_res = {}
-    if isinstance(speaker_res, Exception):
-        print(f"⚠️  Speaker agent error: {speaker_res}")
-        speaker_res = {}
-    if isinstance(time_res, Exception):
-        print(f"⚠️  Time segmenter error: {time_res}")
-        time_res = {}
-    if isinstance(compliance_res, Exception):
-        print(f"⚠️  Compliance monitor error: {compliance_res}")
-        compliance_res = {}
 
-    # Target SLA calculation
-    sla_hours = 2 if priority == "CRITICAL" else (6 if priority == "HIGH" else (12 if priority == "MEDIUM" else 24))
-
-    # 7. Grounded Resolution & Response Generation
-    # Include NLP metadata in LLM prompt for richer grounding
-    keyword_summary = ", ".join(kw_res.get("keywords", [])[:5]) if kw_res else "N/A"
-    entity_orgs     = ", ".join(ner_res.get("organizations", [])[:3]) if ner_res else "N/A"
-    entity_locs     = ", ".join(ner_res.get("locations", [])[:3]) if ner_res else "N/A"
-    time_summary    = time_res.get("timeline_summary", "N/A") if time_res else "N/A"
-
-    llm_prompt = f"""
-You are TelecomIQ's Senior Telecom Operations Specialist.
+    llm_prompt = f"""You are TelecomIQ's Senior Telecom Operations Specialist.
 Analyze the following complaint and return ONLY valid JSON.
 
 Complaint: "{text}"
@@ -125,79 +114,64 @@ Category: {category} (Confidence: {cat_confidence}%)
 Sentiment: {sentiment} (Score: {sent_score})
 Priority: {priority} (Escalation Risk: {escalation_risk_score}%)
 Escalation Reasons: {', '.join(escalation_reasons)}
-Key Topics: {keyword_summary}
-Entities Mentioned: Organizations={entity_orgs}, Locations={entity_locs}
-Temporal Context: {time_summary}
 Telecom SOP Grounding:
 {kb_context}
 
-Return EXACT JSON format with these exact keys:
+Return EXACTLY this JSON (no extra keys, no markdown):
 {{
   "solution": "Clear 4-step technical action plan (1. Diagnostic, 2. Field/NOC check, 3. Profile reset, 4. SLA target {sla_hours}h)",
   "ticket_summary": "Concise 2-sentence internal operational summary of customer issue and risk level",
   "customer_response": "Professional response explaining immediate diagnostic action, target SLA of {sla_hours}h, and next update timeline.",
   "action": "Technical action tag (e.g. NOC Escalation / Line Diagnostics / Billing Audit)"
-}}
-"""
+}}"""
+
     try:
-        raw_res = await async_ask_ai(llm_prompt)
+        raw_res    = await async_ask_ai(llm_prompt)
         clean_json = raw_res.strip().replace("```json", "").replace("```", "").strip()
-        start = clean_json.find('{')
-        end = clean_json.rfind('}') + 1
-        if start != -1 and end != -1:
+        start, end = clean_json.find("{"), clean_json.rfind("}") + 1
+        if start != -1 and end:
             clean_json = clean_json[start:end]
         llm_data = json.loads(clean_json)
 
-        solution = llm_data.get("solution", f"1. Run automated {category} line diagnostic.\n2. Verify signal/billing metrics in portal.\n3. Reset subscriber connection profile.\n4. Target SLA: {sla_hours} hours.")
-        ticket_summary = llm_data.get("ticket_summary", f"Customer reported a {category} issue with {sentiment.lower()} sentiment. Priority assessed as {priority} with {escalation_risk_score}% escalation risk.")
+        solution          = llm_data.get("solution",          f"1. Run automated {category} line diagnostic.\n2. Verify signal/billing metrics in portal.\n3. Reset subscriber connection profile.\n4. Target SLA: {sla_hours} hours.")
+        ticket_summary    = llm_data.get("ticket_summary",    f"Customer reported a {category} issue with {sentiment.lower()} sentiment. Priority assessed as {priority} with {escalation_risk_score}% escalation risk.")
         customer_response = llm_data.get("customer_response", f"Dear Customer, we have received your {category} report. Our engineering team has assigned priority {priority} to your ticket. Diagnostic checks are underway with a target SLA of {sla_hours} hours.")
-        action = llm_data.get("action", f"{category} Diagnostic & SOP Execution")
+        action            = llm_data.get("action",            f"{category} Diagnostic & SOP Execution")
+
     except Exception as e:
         print(f"ℹ️ LLM Generation fallback triggered ({e}). Using grounded SOP templates.")
-        solution = f"1. Run automated {category} line diagnostic.\n2. Cross-reference regional network alerts.\n3. Reset subscriber network profile.\n4. Target SLA: {sla_hours} hours."
-        ticket_summary = f"Customer reported a {category} complaint. Classified as {priority} priority with {escalation_risk_score}% escalation risk."
+        solution          = f"1. Run automated {category} line diagnostic.\n2. Cross-reference regional network alerts.\n3. Reset subscriber network profile.\n4. Target SLA: {sla_hours} hours."
+        ticket_summary    = f"Customer reported a {category} complaint. Classified as {priority} priority with {escalation_risk_score}% escalation risk."
         customer_response = f"Dear Customer, thank you for contacting TelecomIQ Support. Your {category} issue has been registered under Priority {priority}. Technical investigation has been initiated with a target resolution SLA of {sla_hours} hours."
-        action = f"Technical SOP Check for {category}"
+        action            = f"Technical SOP Check for {category}"
 
     steps = [
-        {"step": "Input Validation", "status": "Valid telecom complaint text confirmed"},
-        {"step": "Telecom Classifier", "status": f"Category: {category} ({cat_confidence}% confidence)"},
-        {"step": "Sentiment Analyzer", "status": f"Sentiment: {sentiment} (Score: {sent_score})"},
-        {"step": "Priority & Risk Model", "status": f"Priority: {priority} | Escalation Risk: {escalation_risk_score}%"},
-        {"step": "Vector Historical Search", "status": f"Retrieved {len(similar_complaints)} matching historical tickets"},
-        {"step": "Grounding RAG Engine", "status": f"SOP sources: {', '.join(kb_sources[:2]) if kb_sources else 'Telecom Operational SOP'}"},
-        {"step": "NER Extraction", "status": f"Entities: {ner_res.get('entity_count', 0)} found | Orgs: {entity_orgs}"},
-        {"step": "Keyword Extraction", "status": f"Keywords: {keyword_summary}"},
-        {"step": "Speaker Identification", "status": f"Format: {speaker_res.get('transcript_format','N/A')} | Speakers: {', '.join(speaker_res.get('speakers', ['Customer']))}"},
-        {"step": "Time Segmentation", "status": f"Segments: {time_res.get('total_segments', 1)} | {time_summary[:80]}"},
-        {"step": "Compliance Monitor", "status": f"Risk: {compliance_res.get('risk_level','N/A')} | PII: {compliance_res.get('pii_types',[])} | Flags: {compliance_res.get('compliance_flags',[])}"},
-        {"step": "Resolution & Response", "status": "Grounded resolution recommendation generated"}
+        {"step": "Input Validation",       "status": "Valid telecom complaint text confirmed"},
+        {"step": "Telecom Classifier",     "status": f"Category: {category} ({cat_confidence}% confidence)"},
+        {"step": "Sentiment Analyzer",     "status": f"Sentiment: {sentiment} (Score: {sent_score})"},
+        {"step": "Priority & Risk Model",  "status": f"Priority: {priority} | Escalation Risk: {escalation_risk_score}%"},
+        {"step": "Vector Historical Search","status": f"Retrieved {len(similar_complaints)} matching historical tickets"},
+        {"step": "RAG Knowledge Base",     "status": f"SOP sources: {', '.join(kb_sources[:2]) if kb_sources else 'Telecom Operational SOP'}"},
+        {"step": "GenAI Triage Assistant", "status": "Resolution recommendation and ticket summary generated"},
     ]
 
     return {
-        "is_sufficient": True,
-        "category": category,
-        "confidence": cat_confidence,
-        "priority": priority,
-        "sentiment": sentiment,
-        "sentiment_score": sent_score,
-        "escalation_required": escalation_required,
+        "is_sufficient":        True,
+        "category":             category,
+        "confidence":           cat_confidence,
+        "priority":             priority,
+        "sentiment":            sentiment,
+        "sentiment_score":      sent_score,
+        "escalation_required":  escalation_required,
         "escalation_risk_score": escalation_risk_score,
-        "escalation_reasons": escalation_reasons,
-        "solution": solution,
-        "ticket_summary": ticket_summary,
-        "response": customer_response,
-        "action": action,
-        "satisfaction": "Low" if sentiment == "Negative" else "High",
-        "similar_issues": similar_complaints,
-        "kb_sources": kb_sources,
-        "steps": steps,
-        "is_anomaly": escalation_required,
-        # ── NLP metadata ────────────────────────────────────────────── #
-        "named_entities":    ner_res,
-        "keywords":          kw_res,
-        "speaker_analysis":  speaker_res,
-        "time_segmentation": time_res,
-        # ── Compliance & Privacy ─────────────────────────────────────── #
-        "compliance_analysis": compliance_res,
+        "escalation_reasons":   escalation_reasons,
+        "solution":             solution,
+        "ticket_summary":       ticket_summary,
+        "response":             customer_response,
+        "action":               action,
+        "satisfaction":         "Low" if sentiment == "Negative" else "High",
+        "similar_issues":       similar_complaints,
+        "kb_sources":           kb_sources,
+        "steps":                steps,
+        "is_anomaly":           escalation_required,
     }
