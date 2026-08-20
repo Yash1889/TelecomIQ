@@ -1,212 +1,141 @@
-# TelecomIQ — Enterprise Telecom Complaint Intelligence & Automated Resolution Platform
+# TelecomIQ — Telecom Complaint Intelligence & Automated Resolution Assistant
 
 <p align="center">
-  <img src="https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
-  <img src="https://img.shields.io/badge/Groq_Cloud_AI-Qwen_3.6--27B-FF4A00?style=for-the-badge&logo=groq&logoColor=white" alt="Groq AI"/>
-  <img src="https://img.shields.io/badge/Scikit--Learn-TF--IDF_Classifier-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="Scikit-Learn"/>
-  <img src="https://img.shields.io/badge/Kaggle_Dataset-2224_Records-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white" alt="Kaggle Dataset"/>
-  <img src="https://img.shields.io/badge/Model_Accuracy-96.00%25-green?style=for-the-badge" alt="Accuracy"/>
-  <img src="https://img.shields.io/badge/Developer-Yashraj_Gupta-blue?style=for-the-badge" alt="Developer"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.110.0-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
+  <img src="https://img.shields.io/badge/React-19.2.0-61DAFB?style=for-the-badge&logo=react&logoColor=black"/>
+  <img src="https://img.shields.io/badge/LangGraph-Agentic_Orchestration-6366f1?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Scikit--Learn-TF--IDF_+_LR-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/DistilBERT-Deep_Learning-FF4A00?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Kaggle_Dataset-2204_Records-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Test_Accuracy-89.12%25-green?style=for-the-badge"/>
 </p>
 
 ---
 
-## 📌 Executive Overview
+## 📌 Overview
 
-**TelecomIQ** is an enterprise-grade **AI-Powered Telecom Complaint Intelligence & Automated Resolution System** built for telecom operators, support agents, Network Operation Centers (NOCs), and subscribers. 
+**TelecomIQ** is an AI-powered complaint intelligence platform for telecom operators. It automatically classifies complaints, detects customer sentiment, predicts escalation risks, recommends resolutions, and generates ticket summaries — orchestrated end-to-end using a **LangGraph** agentic pipeline.
 
-The platform ingests raw subscriber complaint text and executes an automated multi-model pipeline: **ML Domain Classification**, **VADER Sentiment Analysis**, **Multi-Factor Escalation Risk Scoring**, **TF-IDF Vector RAG Matching**, and **Groq Cloud LLM Orchestration** to generate precise, SLA-backed complaint resolutions in real-time.
-
----
-
-## 📂 Dataset & Training Data
-
-### 📊 Dataset Used: Kaggle Telecom Complaints Monitoring System
-This platform is trained and evaluated on the official Kaggle dataset:
-👉 **[`ravillatejakumar/telecom-complaints-monitoring-system`](https://www.kaggle.com/datasets/ravillatejakumar/telecom-complaints-monitoring-system)** (`Comcast_telecom_complaints_data.csv`).
-
-### 🔍 What is in the Dataset?
-- **Total Records**: **2,224 real-world consumer complaints**.
-- **Features Included**:
-  - `Ticket #`: Unique ticket reference identifier.
-  - `Customer Complaint`: Raw verbatim complaint text submitted by subscribers.
-  - `Date` / `Time`: Incident timestamps.
-  - `Received Via`: Filing channel (`Internet`, `Customer Care Call`).
-  - `City`, `State`, `Zip Code`: Geographic location data.
-  - `Status`: Customer case status (`Solved`, `Closed`, `Open`, `Pending`).
-
-### ⚙️ How the Dataset is Integrated
-We created an automated pipeline (`backend/scripts/train_kaggle_dataset.py`) that downloads the latest dataset using `kagglehub`, maps raw complaint texts into 11 standardized telecom domain categories, trains Scikit-Learn ML models, builds a TF-IDF vector RAG index, and seeds all 2,224 records directly into `complaints.db`.
+**Use Case**: Telecom Complaint Intelligence & Automated Resolution Assistant  
+**Dataset**: [Kaggle — ravillatejakumar/telecom-complaints-monitoring-system](https://www.kaggle.com/datasets/ravillatejakumar/telecom-complaints-monitoring-system)  
+**Type**: NLP / Information Extraction
 
 ---
 
-## ⚡ How the Site Works (End-to-End Flow)
+## 👥 Team
+
+| # | Member | Ownership | Main Responsibility |
+|---|--------|-----------|---------------------|
+| 1 | **Abhyanshu** | Business + Dataset | Problem definition, dataset, EDA, business impact |
+| 2 | **Srishti** | NLP Metadata | Keywords, NER, speaker identification, time segmentation |
+| 3 | **Yashraj** | ML + Sentiment | Classification (TF-IDF + Logistic Regression), VADER sentiment |
+| 4 | **Vibhuti** | RAG | Retrieval, vector similarity, knowledge base |
+| 5 | **Vaibhav Raj** | GenAI | LLM prompts, resolution generation, ticket summary |
+| 6 | **Veer** | Risk + Compliance | Priority scoring, escalation prediction, PII detection, human-in-loop |
+| 7 | **Vishant** | Full Stack + Architecture | React, FastAPI, database, integration, deployment |
+
+---
+
+## 🔄 End-to-End Pipeline
 
 ```
-[Subscriber Complaint / Chat Message]
-                  │
-                  ▼
-   1. 🎯 Scikit-Learn Domain Classifier (11 Categories)
-                  │
-                  ▼
-   2. 🧠 VADER Sentiment & Polarity Analyzer (Angry/Negative/Neutral/Positive)
-                  │
-                  ▼
-   3. 🚨 Priority & Escalation Risk Scorer (Calculates Risk % & Target SLA)
-                  │
-                  ▼
-   4. 🔍 Vector RAG Cosine Similarity (Searches across 2,224 Kaggle Dataset Vectors)
-                  │
-                  ▼
-   5. 📖 Technical SOP Grounding (Retrieves Standard Operating Procedures from telecom_kb.json)
-                  │
-                  ▼
-   6. 🚀 Groq LLM Resolution Generator (Synthesizes Subscriber Response & Technical Action Plan)
-                  │
-                  ▼
-   7. 🗄️ Database & Ticket Persistence (Generates TC-YYYYMMDD-XXXX in SQLite DB)
-                  │
-                  ▼
-   8. 📊 Admin & Agent Synchronization (Appears instantly on Admin Dashboard & Agent Queue)
+Customer Complaint
+       ↓
+  Input Validation
+       ↓
+  Text Classification        (TF-IDF + Logistic Regression — 89.12% accuracy)
+       ↓
+  Sentiment Analysis         (VADER + TextBlob)
+       ↓
+  Priority + Escalation Risk (Multi-factor scoring → CRITICAL / HIGH / MEDIUM / LOW)
+       ↓
+  Vector Historical Search   (Cosine similarity over 2,200+ indexed tickets)
+       ↓
+  RAG Knowledge Base         (TF-IDF over 11 telecom SOP documents)
+       ↓
+  LangGraph Orchestration    (7-node StateGraph)
+       ↓
+  GenAI Triage Assistant     (Groq → Gemini → SOP fallback)
+       ↓
+  Resolution + Ticket Summary
+       ↓
+  Support Agent / Dashboard
 ```
 
 ---
 
-## 🧮 Mathematical & Technical Calculations
+## 📂 Dataset
 
-The backend engine performs 4 core mathematical and statistical calculations for every incoming complaint:
-
-### 1. Text Classification (TF-IDF + Logistic Regression)
-Text features are extracted using Term Frequency-Inverse Document Frequency (TF-IDF) with n-gram range `(1, 2)` across 8,000 maximum features:
-$$\text{TF-IDF}(t, d, D) = \text{TF}(t, d) \times \log\left(\frac{|D|}{1 + |\{d \in D : t \in d\}|}\right)$$
-The feature vector is passed to a balanced Multi-Class Logistic Regression model to output category probability distributions across 11 telecom domains.
-
-### 2. Sentiment Intensity & Polarity Scoring (VADER)
-Calculates valence scores for individual words to produce a normalized compound sentiment score $S_{\text{vader}} \in [-1.0, +1.0]$:
-- $S_{\text{vader}} \le -0.5 \implies \text{Angry}$
-- $-0.5 < S_{\text{vader}} \le -0.1 \implies \text{Negative}$
-- $-0.1 < S_{\text{vader}} < +0.1 \implies \text{Neutral}$
-- $S_{\text{vader}} \ge +0.1 \implies \text{Positive}$
-
-### 3. Priority & Escalation Risk Score Formula
-The system computes a multi-factor risk percentage $R \in [10\%, 99\%]$:
-$$R = \left( 0.50 \times W_{\text{category}} \right) + \left( 0.30 \times |S_{\text{vader}}| \right) + \left( 0.20 \times U_{\text{keyword}} \right)$$
-- If $R \ge 65\% \implies$ Flagged as **`HIGH Priority`** with **2-6 hour SLA target**.
-- If $R < 65\% \implies$ Assigned as **`MEDIUM / LOW Priority`** with **12-24 hour SLA target**.
-
-### 4. Vector RAG Cosine Similarity Match
-Determines top-3 historical ticket matches from the 2,224 Kaggle dataset vectors using cosine similarity:
-$$\text{Cosine Similarity}(\mathbf{A}, \mathbf{B}) = \frac{\mathbf{A} \cdot \mathbf{B}}{\|\mathbf{A}\| \|\mathbf{B}\|} = \frac{\sum_{i=1}^{n} A_i B_i}{\sqrt{\sum_{i=1}^{n} A_i^2} \sqrt{\sum_{i=1}^{n} B_i^2}}$$
+| Property | Value |
+|----------|-------|
+| Source | Kaggle — `ravillatejakumar/telecom-complaints-monitoring-system` |
+| Raw records | 2,224 |
+| After deduplication | 2,204 |
+| Train / Val / Test split | 70% / 15% / 15% |
+| Test accuracy | **89.12%** |
+| Weighted F1 | **0.8903** |
 
 ---
 
-## 📈 Authoritative ML Validation Audit (Kaggle Dataset)
+## 🧪 ML Validation Results (Held-Out Test Set — 331 Samples)
 
-We performed a rigorous **Machine Learning Validation Audit** on the Kaggle Telecom Complaints dataset (`ravillatejakumar/telecom-complaints-monitoring-system` / `Comcast_telecom_complaints_data.csv`).
-
-### 🛡️ Quality Control & Leakage Prevention
-1. **Deduplication BEFORE Splitting**: Removed 20 verbatim text string duplicates from the raw 2,224 dataset $\rightarrow$ **2,204 clean unique records**.
-2. **Stratified 70/15/15 Split**:
-   - **Training Set (70%)**: 1,542 samples
-   - **Validation Set (15%)**: 331 samples
-   - **Held-Out Test Set (15%)**: 331 samples (100% untouched)
-3. **Data Leakage Verification**: **0 text overlap** across Train, Validation, and Test splits.
-
----
-
-### 🧪 Held-Out Test Set Performance (Unseen 15% Split — 331 Samples)
-
-- **Test Accuracy**: **89.12%**
-- **Weighted F1-Score**: **0.8903**
-- **Weighted Precision**: **0.9019**
-- **Weighted Recall**: **0.8912**
-- **Macro F1-Score**: **0.7300**
-
-| Category | Precision | Recall | F1-Score | Held-Out Test Support |
-| :--- | :---: | :---: | :---: | :---: |
-| **Billing Dispute** | 0.9872 | 0.8021 | **0.8851** | 96 |
-| **Broadband Performance** | 0.9024 | 0.9737 | **0.9367** | 38 |
-| **Call Drops** | 0.6667 | 1.0000 | **0.8000** | 4 |
-| **Cancellation** | 0.7500 | 1.0000 | **0.8571** | 3 |
-| **Customer Service** | 0.8889 | 0.8889 | **0.8889** | 9 |
-| **Data / Usage Issue** | 0.9444 | 0.9714 | **0.9577** | 35 |
-| **Equipment / Router** | 0.5000 | 1.0000 | **0.6667** | 1 |
-| **Installation** | 1.0000 | 0.3333 | **0.5000** | 3 |
-| **Network Connectivity** | 0.0000 | 0.0000 | 0.0000 | 1 |
-| **Service Outage** | 0.5385 | 0.7778 | **0.6364** | 9 |
-| **Service Request** | 0.8723 | 0.9318 | **0.9011** | 132 |
-| **OVERALL SYSTEM METRIC** | **0.9019** | **0.8912** | **0.8903** | **331** |
+| Category | Precision | Recall | F1-Score | Support |
+|----------|:---------:|:------:|:--------:|:-------:|
+| Billing Dispute | 0.987 | 0.802 | **0.885** | 96 |
+| Broadband Performance | 0.902 | 0.974 | **0.937** | 38 |
+| Call Drops | 0.667 | 1.000 | **0.800** | 4 |
+| Cancellation | 0.750 | 1.000 | **0.857** | 3 |
+| Customer Service | 0.889 | 0.889 | **0.889** | 9 |
+| Data / Usage Issue | 0.944 | 0.971 | **0.958** | 35 |
+| Equipment / Router | 0.500 | 1.000 | **0.667** | 1 |
+| Installation | 1.000 | 0.333 | **0.500** | 3 |
+| Network Connectivity | 0.000 | 0.000 | 0.000 | 1 |
+| Service Outage | 0.539 | 0.778 | **0.636** | 9 |
+| Service Request | 0.872 | 0.932 | **0.901** | 132 |
+| **Overall** | **0.902** | **0.891** | **0.890** | **331** |
 
 ---
 
-## 🌟 Key Platform Modules & Portals
+## 🛠️ Technical Stack
 
-### 1. 🌐 Subscriber Portal (`Landing.jsx` & `ComplaintForm.jsx`)
-- Interactive complaint submission form with real-time quick presets.
-- Embedded Side AI Chatbot with **Real SQLite Ticket Lookup** (`TC-XXXXX`).
-
-### 2. 📊 Admin Dashboard (`AdminDashboard.jsx`)
-- Displays overall system metrics, category distributions, priority breakdowns, and resolution rates.
-- Search, filter, and paginate across all **2,224 dataset complaints** live from SQLite DB.
-
-### 3. 🛠️ Support Agent Queue (`AgentModule.jsx` & `AgentResolutions.jsx`)
-- Allows support officers to review AI-generated resolutions, adjust priority levels, and mark complaints as resolved.
-
----
-
-## 🔑 Authentication & Demo Access
-
-TelecomIQ features frictionless single-click demo access for evaluators:
-- **Sign-In**: Enter **ANY email** and **ANY password**.
-  - Email contains `admin` (e.g. `admin@telecomiq.com` or `admin@gmail.com`) $\implies$ Grants **Admin Dashboard Access**.
-  - Email contains `agent` (e.g. `agent@telecomiq.com`) $\implies$ Grants **Support Agent Queue Access**.
-  - Any other email $\implies$ Grants **Subscriber Access**.
+| Layer | Technology |
+|-------|-----------|
+| Agentic Orchestration | LangGraph StateGraph (7 nodes) |
+| ML Classification | Scikit-learn TF-IDF + Logistic Regression |
+| Deep Learning | DistilBERT (offline fallback), BART zero-shot |
+| Sentiment Analysis | VADER + TextBlob |
+| GenAI | Groq (Qwen/Llama) → Gemini → SOP fallback |
+| Vector DB / RAG | TF-IDF cosine similarity over 2,200+ complaints + 11 SOP docs |
+| Backend | FastAPI + SQLAlchemy + SQLite/PostgreSQL |
+| Frontend | React 19 + Vite |
+| Deployment | Render (backend) + Vercel (frontend) |
 
 ---
 
-## ⚡ Setup & Local Execution Instructions
+## 🚀 Local Setup
 
-### 1. Prerequisites
-- Python 3.10+
-- Node.js 18+
-
-### 2. Backend Setup
+### Backend
 ```bash
 cd backend
-python3 -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies:
 pip install -r requirements.txt
-pip install kagglehub pandas scikit-learn
-
-# Run Kaggle Dataset Download, ML Training & DB Seeding:
-python scripts/train_kaggle_dataset.py
-
-# Start FastAPI backend server:
-python start_backend.py
+python scripts/train_kaggle_dataset.py   # download dataset, train models, seed DB
+python start_backend.py                  # runs on http://localhost:8000
 ```
-Backend API runs at: `http://localhost:8000` (Swagger Docs at `http://localhost:8000/docs`).
 
-### 3. Frontend Setup
+### Frontend
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run dev                              # runs on http://localhost:5173
 ```
-Frontend Portal runs at: `http://localhost:5173`.
 
----
-
-## 👨‍💻 Author & Engineering Credits
-
-- **Developer**: **Yashraj Gupta**
-- **Role**: Software Engineer | AI & ML Enthusiast | Competitive Programmer
-- **LinkedIn**: [https://www.linkedin.com/in/yash-raj-gupta001/](https://www.linkedin.com/in/yash-raj-gupta001/)
-- **GitHub**: [https://github.com/Yash1889](https://github.com/Yash1889)
+### Demo Access
+- Any email containing `admin` → Admin Dashboard
+- Any email containing `agent` → Agent Queue
+- Any other email → Subscriber view
 
 ---
 
 ## 📄 License
-This project is built for the **Cognizant NPN AI & Analytics evaluation** under the MIT License.
+
+MIT License — built for the Cognizant NPN AI & Analytics evaluation.
