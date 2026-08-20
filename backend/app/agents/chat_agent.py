@@ -95,16 +95,21 @@ async def handle_chat_message(message: str) -> dict:
     user_language = detect_language(clean_msg)
     language_instruction = get_language_instruction(user_language)
 
-    # 🚀 TIER 1: FAST PATH (Greetings)
-    greetings_keywords = ["hi", "hello", "hey", "halo", "namaste", "salaam", "test", "hn", "ji", "ok", "acha", "hmm", "yo", "morning", "night", "sup", "greeting", "namas", "namaskar"]
-    if (len(clean_msg) < 4 and clean_msg.lower() in greetings_keywords) or clean_msg.lower() in greetings_keywords:
+    # 🚀 TIER 1: FAST PATH (Greetings & Small Talk)
+    import re
+    lower_msg = clean_msg.lower()
+    greeting_patterns = [
+        r'\b(hi+|hello+|hey+|halo+|namaste+|salaam+|yo+|sup+|hola+|good\s*morning|good\s*evening|good\s*afternoon)\b'
+    ]
+    is_greeting = any(re.search(pat, lower_msg) for pat in greeting_patterns)
+    if is_greeting and len(clean_msg) < 35:
         greetings = {
             'hinglish': "Hello! Main TelecomIQ AI Agent hoon. Main aapki kya help kar sakta hoon?",
             'hindi': "नमस्ते! मैं टेलीकॉमआईक्यू एआई एजेंट हूँ। मैं आपकी क्या मदद कर सकता हूँ?",
             'mixed': "Hi! I'm TelecomIQ AI Agent. Tell me how I can assist you today.",
-            'english': "Hello! How can I assist you today? Feel free to file a complaint or ask about our telecom services."
+            'english': "Hello! 👋 How can I assist you today? Feel free to ask a question or file a complaint for any telecom issue!"
         }
-        print(f"🌐 Detected Language: {user_language}")
+        print(f"🌐 Fast Path Greeting Detected: {user_language}")
         res = {"role": "agent", "type": "info", "response": greetings.get(user_language, greetings['english']), "language": user_language}
         _chat_cache[msg_key] = res
         return res

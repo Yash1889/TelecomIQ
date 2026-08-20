@@ -352,7 +352,6 @@ export default function Landing({ user, onStart, onNavigate }) {
 
   return (
     <div className="landing-container">
-      <HeroBackground />
       {/* Background Effects */}
 
       {/* Header */}
