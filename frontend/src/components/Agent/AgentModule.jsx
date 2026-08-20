@@ -241,10 +241,17 @@ export default function AgentModule({ user, onNavigate }) {
                         </select>
                         <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
                             <option value="">All Categories</option>
-                            <option value="Technical">Technical</option>
-                            <option value="Billing">Billing</option>
-                            <option value="Delivery">Delivery</option>
-                            <option value="Service">Service</option>
+                            <option value="Network Connectivity">Network Connectivity</option>
+                            <option value="Broadband Performance">Broadband Performance</option>
+                            <option value="Call Drops">Call Drops</option>
+                            <option value="Service Outage">Service Outage</option>
+                            <option value="Billing Dispute">Billing Dispute</option>
+                            <option value="Data / Usage Issue">Data / Usage Issue</option>
+                            <option value="Installation">Installation</option>
+                            <option value="Equipment / Router">Equipment / Router</option>
+                            <option value="Service Request">Service Request</option>
+                            <option value="Cancellation">Cancellation</option>
+                            <option value="Customer Service">Customer Service</option>
                         </select>
                     </div>
                 </div>
@@ -338,71 +345,6 @@ export default function AgentModule({ user, onNavigate }) {
                                                 <strong>🤖 AI Suggestion:</strong>
                                                 <p style={{ marginTop: '0.25rem' }}>{selectedComplaint.ai_solution}</p>
                                             </div>
-
-                                            {/* ── Compliance & Privacy Status ── */}
-                                            {(() => {
-                                                const ca = selectedComplaint.compliance_analysis || {};
-                                                if (!Object.keys(ca).length) return null;
-                                                const riskLevel = ca.risk_level || "CLEAR";
-                                                const riskColors = {
-                                                    CRITICAL: { bg: "rgba(220,38,38,0.1)",  border: "#dc2626", text: "#dc2626", icon: "🚨" },
-                                                    HIGH:     { bg: "rgba(234,88,12,0.1)",  border: "#ea580c", text: "#ea580c", icon: "⚠️" },
-                                                    MEDIUM:   { bg: "rgba(202,138,4,0.1)",  border: "#ca8a04", text: "#ca8a04", icon: "🔔" },
-                                                    LOW:      { bg: "rgba(37,99,235,0.08)", border: "#2563eb", text: "#2563eb", icon: "ℹ️" },
-                                                    CLEAR:    { bg: "rgba(16,185,129,0.08)", border: "#059669", text: "#059669", icon: "✅" },
-                                                };
-                                                const c = riskColors[riskLevel] || riskColors.CLEAR;
-                                                return (
-                                                    <div style={{
-                                                        marginTop: "1.2rem",
-                                                        padding: "1rem",
-                                                        borderRadius: "8px",
-                                                        background: c.bg,
-                                                        border: `1px solid ${c.border}`,
-                                                        fontSize: "0.85rem",
-                                                    }}>
-                                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                                                            <strong style={{ color: c.text }}>{c.icon} Compliance & Privacy Status</strong>
-                                                            <span style={{ background: c.border, color: "white", padding: "0.15rem 0.6rem", borderRadius: "8px", fontWeight: 700, fontSize: "0.78rem" }}>
-                                                                {riskLevel}
-                                                            </span>
-                                                        </div>
-                                                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "0.6rem" }}>
-                                                            <div>
-                                                                <span style={{ opacity: 0.6, fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" }}>PII Detected</span>
-                                                                <div style={{ fontWeight: 700, color: ca.pii_detected ? "#dc2626" : "#059669" }}>
-                                                                    {ca.pii_detected ? (ca.pii_types || []).join(", ") : "None"}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ opacity: 0.6, fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" }}>Policy Flags</span>
-                                                                <div style={{ fontWeight: 700, color: ca.policy_violation ? "#dc2626" : "#059669" }}>
-                                                                    {ca.policy_violation ? (ca.compliance_flags || []).join(", ") : "None"}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ opacity: 0.6, fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" }}>Sensitive Content</span>
-                                                                <div style={{ fontWeight: 700, color: ca.sensitive_content ? "#ea580c" : "#059669" }}>
-                                                                    {ca.sensitive_content ? "Yes" : "No"}
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <span style={{ opacity: 0.6, fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase" }}>Action</span>
-                                                                <div style={{ fontWeight: 700, color: c.text }}>
-                                                                    {(ca.compliance_action || "NO_ACTION_REQUIRED").replaceAll("_", " ")}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        {ca.recommended_actions && ca.recommended_actions.filter(r => !r.includes("No compliance")).length > 0 && (
-                                                            <ul style={{ margin: "0.4rem 0 0 1rem", padding: 0, lineHeight: 1.65 }}>
-                                                                {ca.recommended_actions.filter(r => !r.includes("No compliance")).map((r, i) => (
-                                                                    <li key={i}>{r}</li>
-                                                                ))}
-                                                            </ul>
-                                                        )}
-                                                    </div>
-                                                );
-                                            })()}
                                         </div>
                                     </div>
 

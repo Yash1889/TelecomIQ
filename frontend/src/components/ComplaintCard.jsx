@@ -25,7 +25,6 @@ export default function ComplaintCard({ data }) {
     similar_issues = [],
     kb_sources = [],
     steps = [],
-    compliance_analysis = {}
   } = data;
 
   const handleCopyTicket = () => {
@@ -44,30 +43,14 @@ export default function ComplaintCard({ data }) {
 
   const getSentimentBadge = (sent) => {
     switch (sent) {
-      case "Angry": return "😡 Angry";
+      case "Angry":    return "😡 Angry";
       case "Negative": return "🙁 Negative";
       case "Positive": return "😊 Positive";
-      default: return "😐 Neutral";
+      default:         return "😐 Neutral";
     }
   };
 
   const prioStyle = getPriorityStyle(priority);
-
-  // ── Compliance helpers ────────────────────────────────────────────────── //
-  const getRiskStyle = (level) => {
-    switch ((level || "").toUpperCase()) {
-      case "CRITICAL": return { bg: "rgba(220,38,38,0.08)",  border: "rgba(220,38,38,0.35)",  text: "#dc2626", icon: "🚨" };
-      case "HIGH":     return { bg: "rgba(234,88,12,0.08)",  border: "rgba(234,88,12,0.35)",  text: "#ea580c", icon: "⚠️" };
-      case "MEDIUM":   return { bg: "rgba(202,138,4,0.08)",  border: "rgba(202,138,4,0.35)",  text: "#ca8a04", icon: "🔔" };
-      case "LOW":      return { bg: "rgba(37,99,235,0.06)",  border: "rgba(37,99,235,0.25)",  text: "#2563eb", icon: "ℹ️" };
-      default:         return { bg: "rgba(16,185,129,0.06)", border: "rgba(16,185,129,0.25)", text: "#059669", icon: "✅" };
-    }
-  };
-
-  const ca = compliance_analysis || {};
-  const riskLevel = ca.risk_level || "CLEAR";
-  const riskStyle = getRiskStyle(riskLevel);
-  const showCompliance = Object.keys(ca).length > 0;
 
   if (data.is_sufficient === false) {
     return (
@@ -161,31 +144,39 @@ export default function ComplaintCard({ data }) {
         </div>
       )}
 
-      {/* Technical Solution SOP */}
+      {/* Recommended Resolution */}
       {solution && (
         <div style={{ marginBottom: "1.2rem", padding: "0.9rem", borderRadius: "8px", background: "rgba(37, 99, 235, 0.05)", border: "1px solid rgba(37, 99, 235, 0.2)" }}>
-          <h4 style={{ margin: "0 0 0.4rem 0", color: "#2563eb", fontSize: "0.95rem" }}>🛠️ Recommended Technical SOP Action Plan:</h4>
+          <h4 style={{ margin: "0 0 0.4rem 0", color: "#2563eb", fontSize: "0.95rem" }}>🛠️ Recommended Resolution Action Plan:</h4>
           <div style={{ fontSize: "0.9rem", whiteSpace: "pre-line", lineHeight: 1.5 }}>{solution}</div>
         </div>
       )}
 
-      {/* Grounded Customer Response */}
+      {/* Ticket Summary */}
+      {ticket_summary && (
+        <div style={{ marginBottom: "1.2rem", padding: "0.9rem", borderRadius: "8px", background: "rgba(124, 58, 237, 0.05)", border: "1px solid rgba(124, 58, 237, 0.2)" }}>
+          <h4 style={{ margin: "0 0 0.4rem 0", color: "#7c3aed", fontSize: "0.95rem" }}>📋 Automatic Ticket Summary:</h4>
+          <div style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>{ticket_summary}</div>
+        </div>
+      )}
+
+      {/* Customer Response */}
       {response && (
         <div style={{ marginBottom: "1.2rem", padding: "0.9rem", borderRadius: "8px", background: "rgba(16, 185, 129, 0.05)", border: "1px solid rgba(16, 185, 129, 0.2)" }}>
-          <h4 style={{ margin: "0 0 0.4rem 0", color: "#059669", fontSize: "0.95rem" }}>💬 Grounded Customer Response:</h4>
+          <h4 style={{ margin: "0 0 0.4rem 0", color: "#059669", fontSize: "0.95rem" }}>💬 GenAI Triage Response:</h4>
           <div style={{ fontSize: "0.9rem", lineHeight: 1.5 }}>{response}</div>
         </div>
       )}
 
-      {/* Vector Similar Historical Complaints */}
+      {/* Vector RAG — Similar Historical Complaints */}
       {similar_issues && similar_issues.length > 0 && (
         <div style={{ marginTop: "1.2rem" }}>
-          <h4 style={{ margin: "0 0 0.6rem 0", fontSize: "0.95rem", opacity: 0.9 }}>🔍 Top Similar Historical Complaints (Vector RAG Match):</h4>
+          <h4 style={{ margin: "0 0 0.6rem 0", fontSize: "0.95rem", opacity: 0.9 }}>🔍 Similar Historical Complaints (Vector RAG):</h4>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {similar_issues.map((item, idx) => (
               <div key={idx} style={{ padding: "0.6rem 0.8rem", borderRadius: "6px", background: "rgba(100, 116, 139, 0.08)", display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem" }}>
                 <div>
-                  <strong style={{ color: "#2563eb" }}>{item.ticket_id}</strong> - {item.description}
+                  <strong style={{ color: "#2563eb" }}>{item.ticket_id}</strong> — {item.description}
                   <div style={{ fontSize: "0.75rem", opacity: 0.75 }}>Category: {item.category} | Status: <strong>{item.status}</strong></div>
                 </div>
                 <div style={{ background: "rgba(37, 99, 235, 0.15)", color: "#2563eb", padding: "0.2rem 0.5rem", borderRadius: "10px", fontWeight: 700, fontSize: "0.8rem", whiteSpace: "nowrap" }}>
@@ -197,69 +188,10 @@ export default function ComplaintCard({ data }) {
         </div>
       )}
 
-      {/* Grounded KB Sources */}
+      {/* RAG KB Sources */}
       {kb_sources && kb_sources.length > 0 && (
         <div style={{ marginTop: "1rem", fontSize: "0.8rem", opacity: 0.7, borderTop: "1px dashed rgba(100, 116, 139, 0.3)", paddingTop: "0.5rem" }}>
-          📚 Grounded Knowledge SOP Sources: {kb_sources.join(" | ")}
-        </div>
-      )}
-
-      {/* ── Compliance & Privacy Status ────────────────────────────── */}
-      {showCompliance && (
-        <div style={{
-          marginTop: "1.2rem",
-          padding: "0.9rem 1rem",
-          borderRadius: "8px",
-          background: riskStyle.bg,
-          border: `1px solid ${riskStyle.border}`,
-        }}>
-          {/* Header row */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.4rem", marginBottom: "0.75rem" }}>
-            <h4 style={{ margin: 0, fontSize: "0.95rem", color: riskStyle.text, display: "flex", alignItems: "center", gap: "0.4rem" }}>
-              {riskStyle.icon} Compliance & Privacy Status
-            </h4>
-            <span style={{
-              padding: "0.2rem 0.65rem", borderRadius: "10px", fontWeight: 700, fontSize: "0.8rem",
-              background: riskStyle.border, color: riskStyle.text,
-            }}>
-              Risk: {riskLevel}
-            </span>
-          </div>
-
-          {/* 2-col grid of key facts */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.5rem", fontSize: "0.82rem", marginBottom: "0.7rem" }}>
-            <div>
-              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>PII Detected</span>
-              <div style={{ fontWeight: 700, color: ca.pii_detected ? "#dc2626" : "#059669" }}>
-                {ca.pii_detected ? `Yes — ${(ca.pii_types || []).join(", ")}` : "None"}
-              </div>
-            </div>
-            <div>
-              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Policy Flags</span>
-              <div style={{ fontWeight: 700, color: ca.policy_violation ? "#dc2626" : "#059669" }}>
-                {ca.policy_violation ? (ca.compliance_flags || []).join(", ") : "None"}
-              </div>
-            </div>
-            <div>
-              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Sensitive Content</span>
-              <div style={{ fontWeight: 700, color: ca.sensitive_content ? "#ea580c" : "#059669" }}>
-                {ca.sensitive_content ? (ca.compliance_flags || []).join(", ") : "None"}
-              </div>
-            </div>
-            <div>
-              <span style={{ opacity: 0.65, textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700 }}>Recommended Action</span>
-              <div style={{ fontWeight: 700, color: riskStyle.text }}>
-                {(ca.compliance_action || "NO_ACTION_REQUIRED").replaceAll("_", " ")}
-              </div>
-            </div>
-          </div>
-
-          {/* Recommended actions list */}
-          {ca.recommended_actions && ca.recommended_actions.length > 0 && !(ca.recommended_actions[0].includes("No compliance action")) && (
-            <ul style={{ margin: "0.4rem 0 0 1.1rem", padding: 0, fontSize: "0.82rem", lineHeight: 1.6 }}>
-              {ca.recommended_actions.map((r, i) => <li key={i}>{r}</li>)}
-            </ul>
-          )}
+          📚 Knowledge SOP Sources: {kb_sources.join(" | ")}
         </div>
       )}
     </div>
