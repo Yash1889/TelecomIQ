@@ -6,41 +6,40 @@
 
 /* ===== COMPREHENSIVE THEME SYSTEM ===== */
 :root {
-  /* ===== DARK THEME (Default - Futuristic AI) ===== */
-  --dark-bg-primary: #050508;
-  --dark-bg-secondary: #0a0b14;
-  --dark-bg-tertiary: #11121d;
-  --dark-bg-elevated: #161726;
-  --dark-bg-card: rgba(10, 11, 20, 0.8);
-  --dark-bg-hover: rgba(139, 92, 246, 0.1);
-  --dark-bg-active: rgba(139, 92, 246, 0.2);
-  --dark-bg-gradient: radial-gradient(circle at top right, #0a0b14 0%, #050508 100%);
+  /* ===== DARK THEME (Vibrant Premium Futuristic AI) ===== */
+  --dark-bg-primary: #0b0f19;
+  --dark-bg-secondary: #111827;
+  --dark-bg-tertiary: #1f2937;
+  --dark-bg-elevated: #1e293b;
+  --dark-bg-card: rgba(17, 24, 39, 0.85);
+  --dark-bg-hover: rgba(99, 102, 241, 0.15);
+  --dark-bg-active: rgba(99, 102, 241, 0.25);
+  --dark-bg-gradient: radial-gradient(ellipse at 50% 0%, #1e1b4b 0%, #0f172a 55%, #0b0f19 100%);
 
-  --dark-text-primary: #ffffff;
-  --dark-text-secondary: #94a3b8;
-  --dark-text-tertiary: #64748b;
-  --dark-text-inverse: #050508;
-  --dark-text-muted: #475569;
+  --dark-text-primary: #f8fafc;
+  --dark-text-secondary: #cbd5e1;
+  --dark-text-tertiary: #94a3b8;
+  --dark-text-inverse: #0b0f19;
+  --dark-text-muted: #64748b;
 
-  --dark-border-subtle: rgba(255, 255, 255, 0.05);
-  --dark-border-medium: rgba(255, 255, 255, 0.1);
-  --dark-border-strong: rgba(255, 255, 255, 0.2);
+  --dark-border-subtle: rgba(255, 255, 255, 0.08);
+  --dark-border-medium: rgba(255, 255, 255, 0.15);
+  --dark-border-strong: rgba(255, 255, 255, 0.25);
 
   --dark-accent-primary: #10b981;
-  /* Vibrant Emerald Green */
   --dark-accent-primary-hover: #059669;
   --dark-accent-secondary: #8b5cf6;
   --dark-accent-info: #3b82f6;
   --dark-accent-success: #10b981;
   --dark-accent-warning: #f59e0b;
   --dark-accent-error: #ef4444;
-  --dark-accent-glow: rgba(16, 185, 129, 0.2);
+  --dark-accent-glow: rgba(16, 185, 129, 0.25);
 
-  --dark-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
-  --dark-shadow-md: 0 4px 12px -1px rgba(0, 0, 0, 0.6);
-  --dark-shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.8);
-  --dark-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
-  --dark-shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+  --dark-shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --dark-shadow-md: 0 4px 14px -1px rgba(0, 0, 0, 0.5);
+  --dark-shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.7);
+  --dark-shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+  --dark-shadow-glow: 0 0 25px rgba(99, 102, 241, 0.35);
 
   /* ===== LIGHT THEME (Professional Enterprise SaaS) ===== */
   --light-bg-primary: #f8fafc;
@@ -156,6 +155,7 @@ body.light-theme {
 body {
   font-family: "Inter", "Segoe UI", system-ui, sans-serif;
   background: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text-primary);
   min-height: 100vh;
   transition: background 0.3s ease, color 0.3s ease;
