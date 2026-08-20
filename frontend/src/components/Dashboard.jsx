@@ -350,7 +350,6 @@ export default function Dashboard({ onNavigate, onLogout, user, complaints = [],
 
                   <div className="complaint-footer">
                     <span className="complaint-sentiment">😊 {complaint.sentiment}</span>
-                    <span className="complaint-satisfaction">🎯 {complaint.satisfaction_prediction || complaint.satisfaction}</span>
 
                     <button
                       className="resolve-btn-dashboard"

@@ -122,7 +122,7 @@ const TermsModal = ({ isOpen, onClose, onAccept, initialTab = "terms" }) => {
                                     </section>
                                     <section>
                                         <h4>4. Service Uptime</h4>
-                                        <p>We maintain a 99.9% uptime for our decentralized neural nodes. Scheduled maintenance will be communicated 24 standard cycles in advance.</p>
+                                        <p>We aim for high availability across all services. Scheduled maintenance will be communicated in advance via email notification.</p>
                                     </section>
                                 </motion.div>
                             ) : (
@@ -133,7 +133,7 @@ const TermsModal = ({ isOpen, onClose, onAccept, initialTab = "terms" }) => {
                                     </section>
                                     <section>
                                         <h4>2. Neural Encryption</h4>
-                                        <p>All communication within the TelecomIQ platform is encrypted using end-to-end neural protocols. Your personal information is never exposed to external non-authorized entities.</p>
+                                        <p>All communication within the TelecomIQ platform is encrypted. Your personal information is never shared with unauthorised third parties.</p>
                                     </section>
                                     <section>
                                         <h4>3. Use of AI</h4>
@@ -308,7 +308,7 @@ export default function Signup({ onNavigate }) {
                     <div className="auth-header">
                         <div className="auth-brand-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></div>
                         <h2 className="auth-title">Create Your Account</h2>
-                        <p className="auth-subtitle">Join us in the decentralized AI grid</p>
+                        <p className="auth-subtitle">Create an account to submit and track your telecom complaints</p>
                     </div>
 
                     {error && <div style={{ color: "#ef4444", textAlign: 'center', marginBottom: "1rem" }}>{error}</div>}

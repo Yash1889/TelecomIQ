@@ -580,7 +580,7 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
                                 </div>
 
                                 <div className="profile-bio-section">
-                                    <p className="bio-text">{user?.bio || "No professional summary provided. Update your bio to tell others about your role in the AI grid."}</p>
+                                    <p className="bio-text">{user?.bio || "No bio provided."}</p>
                                 </div>
 
                                 {isEditingProfile ? (
@@ -977,7 +977,7 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
                         >
                             <div className="modal-icon warning">⚠️</div>
                             <h2>Delete All Complaints?</h2>
-                            <p>This action cannot be undone. All your reported issues will be permanently removed from the AI grid.</p>
+                            <p>This action cannot be undone. All your submitted complaints will be permanently deleted.</p>
                             <div className="modal-actions">
                                 <button
                                     className="action-btn delete"

@@ -234,7 +234,6 @@ export default function Landing({ user, onStart, onNavigate }) {
 
         <nav className={`nav-links ${isMenuOpen ? 'is-open' : ''}`}>
           <button onClick={() => { scrollToTop(); setIsMenuOpen(false); }} className="nav-btn-home">Home</button>
-          <button onClick={() => { onNavigate('form'); setIsMenuOpen(false); }}>File Complaint</button>
           <button onClick={() => { onNavigate('admin'); setIsMenuOpen(false); }}>Dashboard</button>
           <button onClick={() => { onNavigate('agent-queue'); setIsMenuOpen(false); }}>Agent Queue</button>
           <button onClick={() => { scrollToSection('mission'); setIsMenuOpen(false); }}>Mission</button>

@@ -443,9 +443,10 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
 
                             <select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
                                 <option value="All">All Priorities</option>
-                                <option value="High">High</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Low">Low</option>
+                                <option value="CRITICAL">Critical</option>
+                                <option value="HIGH">High</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="LOW">Low</option>
                             </select>
 
                             <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
@@ -779,10 +780,6 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
                                         <div className="admin-modal-field">
                                             <label>Sentiment</label>
                                             <p>{selectedComplaint.sentiment || "N/A"}</p>
-                                        </div>
-                                        <div className="admin-modal-field">
-                                            <label>Prediction</label>
-                                            <p>{selectedComplaint.satisfaction_prediction || "N/A"}</p>
                                         </div>
                                         <div className="admin-modal-field">
                                             <label>Escalation Risk</label>

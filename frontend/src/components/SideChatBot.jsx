@@ -7,7 +7,7 @@ export default function SideChatBot({ open, onClose }) {
     {
       role: "agent",
       text:
-        "Hi 👋 I'm the AI Support Agent. I can help you understand this website or take your complaint.",
+        "Hi 👋 I'm the TelecomIQ Assistant. Describe your telecom issue and I'll help classify it, or type a ticket ID to look up your complaint status.",
     },
   ]);
   const [input, setInput] = useState("");

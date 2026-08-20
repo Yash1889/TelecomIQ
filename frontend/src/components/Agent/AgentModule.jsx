@@ -235,9 +235,10 @@ export default function AgentModule({ user, onNavigate }) {
                         </select>
                         <select value={filters.priority} onChange={(e) => setFilters({ ...filters, priority: e.target.value })}>
                             <option value="">All Priority</option>
-                            <option value="High">High Priority</option>
-                            <option value="Medium">Medium Priority</option>
-                            <option value="Low">Low Priority</option>
+                            <option value="CRITICAL">Critical</option>
+                            <option value="HIGH">High</option>
+                            <option value="MEDIUM">Medium</option>
+                            <option value="LOW">Low</option>
                         </select>
                         <select value={filters.category} onChange={(e) => setFilters({ ...filters, category: e.target.value })}>
                             <option value="">All Categories</option>
