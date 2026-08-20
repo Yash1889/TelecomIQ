@@ -47,6 +47,11 @@ async def handle_complaint(
         similar = result.get("similar_issues", [])
         kb_sources = result.get("kb_sources", [])
         steps = result.get("steps", [])
+        named_entities    = result.get("named_entities", {})
+        keywords          = result.get("keywords", {})
+        speaker_analysis  = result.get("speaker_analysis", {})
+        time_segmentation = result.get("time_segmentation", {})
+        compliance_analysis = result.get("compliance_analysis", {})
 
         # Generate Professional Telecom Ticket ID (TC-YYYYMMDD-XXXX)
         date_str = get_ist_time().strftime("%Y%m%d")
@@ -117,7 +122,12 @@ async def handle_complaint(
             satisfaction=satisfaction,
             similar_issues=similar,
             kb_sources=kb_sources,
-            steps=steps
+            steps=steps,
+            named_entities=named_entities,
+            keywords=keywords,
+            speaker_analysis=speaker_analysis,
+            time_segmentation=time_segmentation,
+            compliance_analysis=compliance_analysis,
         )
 
     except Exception as e:

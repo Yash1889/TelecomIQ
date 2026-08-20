@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional, List, Any, Union
+from typing import Optional, List, Any, Dict, Union
 
 class ComplaintRequest(BaseModel):
     """Request schema for submitting a complaint"""
@@ -32,6 +32,12 @@ class ComplaintResponse(BaseModel):
     similar_issues: Optional[Any] = []
     kb_sources: Optional[List[str]] = []
     steps: Optional[List[dict]] = []
+    # ── NLP Metadata Extraction ───────────────────────────────────────────── #
+    named_entities: Optional[Dict[str, Any]] = {}
+    keywords: Optional[Dict[str, Any]] = {}
+    speaker_analysis: Optional[Dict[str, Any]] = {}
+    time_segmentation: Optional[Dict[str, Any]] = {}
+    compliance_analysis: Optional[Dict[str, Any]] = {}
 
 class ComplaintDB(BaseModel):
     """Database schema for storing complaint"""

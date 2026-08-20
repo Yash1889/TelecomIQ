@@ -25,3 +25,9 @@ vaderSentiment>=3.3.2
 kagglehub>=0.2.0
 textblob>=0.17.0,<1.0.0
 sqlalchemy-libsql>=0.2.0
+# NLP metadata extraction (use case alignment)
+spacy>=3.8.0,<4.0.0
+en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+yake>=0.4.8
+keybert>=0.7.0
+sentence-transformers>=2.2.0
