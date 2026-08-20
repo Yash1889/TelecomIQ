@@ -885,7 +885,7 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
                                 >
                                     <div className="success-icon">✨</div>
                                     <h2>Thank you for your feedback!</h2>
-                                    <p>Your input helps us improve the QuickFix AI grid for everyone.</p>
+                                    <p>Your input helps us improve the TelecomIQ grid for everyone.</p>
                                     <p className="redirect-note">Returning to dashboard...</p>
                                 </motion.div>
                             ) : (
@@ -909,7 +909,7 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
                                         </div>
 
                                         <div className="form-group">
-                                            <label>How likely are you to recommend QuickFix AI?</label>
+                                            <label>How likely are you to recommend TelecomIQ?</label>
                                             <div className="nps-selector">
                                                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                                                     <button
