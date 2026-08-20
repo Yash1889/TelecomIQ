@@ -237,27 +237,26 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
                     </div>
 
                     <div className="admin-header-right" ref={dropdownRef} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <ThemeToggle className="navbar-theme-toggle" />
                         <button
                             className="btn-secondary"
                             onClick={() => onNavigate("form")}
                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                         >
-                            ⚡ File Complaint
+                            File Complaint
                         </button>
                         <button
                             className="btn-admin"
                             onClick={() => onNavigate("agent-queue")}
                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                         >
-                            🚨 Agent Queue
+                            Agent Queue
                         </button>
                         <button
                             className="btn-secondary"
                             onClick={() => onNavigate("landing")}
                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
                         >
-                            🏠 Landing
+                            Landing
                         </button>
                         <motion.button
                             className="admin-profile-btn"

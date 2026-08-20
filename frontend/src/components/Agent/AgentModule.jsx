@@ -166,21 +166,20 @@ export default function AgentModule({ user, onNavigate }) {
                         <span style={{ fontWeight: 800 }}>TelecomIQ Support Agent</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <ThemeToggle className="navbar-theme-toggle" />
                         <button className="nav-btn" onClick={() => onNavigate("landing")}>
-                            🏠 Landing
+                            Landing
                         </button>
                         <button className="nav-btn" onClick={() => onNavigate("form")}>
-                            ⚡ File Complaint
+                            File Complaint
                         </button>
                         <button className="nav-btn" onClick={() => onNavigate("admin")} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            📊 Dashboard
+                            Dashboard
                         </button>
                         <button className="nav-btn active" onClick={() => onNavigate("agent-queue")}>
-                            📥 Agent Queue
+                            Agent Queue
                         </button>
                         <button className="nav-btn" onClick={() => onNavigate("agent-resolutions")}>
-                            📜 Resolution Log
+                            Resolution Log
                         </button>
                     </div>
                 </div>

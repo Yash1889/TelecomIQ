@@ -321,12 +321,11 @@ export default function Profile({ user, onNavigate, onLogout, complaints = [], s
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                         >
-                            🚨 Agent Queue
+                            Agent Queue
                         </motion.button>
                     </nav>
 
                     <div className="header-right" ref={dropdownRef} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <ThemeToggle className="navbar-theme-toggle" />
                         <motion.button
                             className="profile-btn"
                             whileHover={{ scale: 1.05 }}

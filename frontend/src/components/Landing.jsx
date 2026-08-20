@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./../styles/Landing.css";
 import CookieConsent from "./CookieConsent";
-import ThemeToggle from "./ThemeToggle";
 
 // Interactive Feature Details Modal
 function FeatureModal({ feature, onClose }) {
@@ -449,37 +448,34 @@ export default function Landing({ user, onStart, onNavigate }) {
 
           <div className="mobile-auth-buttons">
             <button className="btn-primary" onClick={() => { onNavigate("form"); setIsMenuOpen(false); }}>
-              ⚡ File Complaint
+              File Complaint
             </button>
             <button className="btn-secondary" onClick={() => { onNavigate("agent-queue"); setIsMenuOpen(false); }}>
-              🎧 Agent Queue
+              Agent Queue
             </button>
             <button className="btn-admin" onClick={() => { onNavigate("admin"); setIsMenuOpen(false); }}>
-              📊 Admin Dashboard
+              Admin Dashboard
             </button>
           </div>
         </nav>
 
         <div className="header-right">
-          <div className="header-actions">
-            <ThemeToggle className="navbar-theme-toggle" />
-            <button
-              className="mobile-menu-toggle"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle navigation menu"
-            >
-              <span className={`hamburger ${isMenuOpen ? "active" : ""}`}></span>
-            </button>
-          </div>
+          <button
+            className="mobile-menu-toggle"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            <span className={`hamburger ${isMenuOpen ? "active" : ""}`}></span>
+          </button>
           <div className="auth-buttons">
             <button className="btn-action-outline" onClick={() => onNavigate("agent-queue")}>
-              🎧 Agent Queue
+              Agent Queue
             </button>
             <button className="btn-action-primary" onClick={() => onNavigate("form")}>
-              ⚡ File Complaint
+              File Complaint
             </button>
             <button className="btn-admin" onClick={() => onNavigate("admin")}>
-              📊 Dashboard
+              Dashboard
             </button>
           </div>
         </div>
@@ -508,14 +504,14 @@ export default function Landing({ user, onStart, onNavigate }) {
 
           <div className="hero-cta">
             <button className="btn-cta btn-primary" onClick={onStart}>
-              <span>⚡ Launch Live Complaint Triage</span>
+              <span>Launch Live Complaint Triage</span>
               <span className="arrow">→</span>
             </button>
             <button className="btn-cta btn-secondary" onClick={() => scrollToSection("live-demo")}>
-              <span>🔍 Try Interactive Simulator</span>
+              <span>Try Interactive Simulator</span>
             </button>
             <button className="btn-cta btn-outline" onClick={() => onNavigate("admin")}>
-              <span>📊 View Admin Analytics</span>
+              <span>View Admin Analytics</span>
             </button>
           </div>
 
@@ -956,9 +952,9 @@ export default function Landing({ user, onStart, onNavigate }) {
 
           <div className="footer-section">
             <h4>Platform Modules</h4>
-            <button onClick={() => onNavigate("form")} className="footer-btn">⚡ File Complaint</button>
-            <button onClick={() => onNavigate("agent-queue")} className="footer-btn">🎧 Agent Queue</button>
-            <button onClick={() => onNavigate("admin")} className="footer-btn">📊 Admin Dashboard</button>
+            <button onClick={() => onNavigate("form")} className="footer-btn">File Complaint</button>
+            <button onClick={() => onNavigate("agent-queue")} className="footer-btn">Agent Queue</button>
+            <button onClick={() => onNavigate("admin")} className="footer-btn">Admin Dashboard</button>
           </div>
 
           <div className="footer-section">

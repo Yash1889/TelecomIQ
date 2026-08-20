@@ -325,18 +325,17 @@ export default function App() {
                 </div>
               </div>
               <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <ThemeToggle className="navbar-theme-toggle" />
                 <button
                   className="nav-btn active"
                   onClick={() => navigateTo("admin")}
                 >
-                  📊 Back to Dashboard
+                  Back to Dashboard
                 </button>
                 <button
                   className="nav-btn"
                   onClick={handleLogout}
                 >
-                  🚪 Logout
+                  Logout
                 </button>
               </div>
             </div>
@@ -379,24 +378,23 @@ export default function App() {
               </div>
             </div>
             <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <ThemeToggle className="navbar-theme-toggle" />
               <button
                 className="nav-btn"
                 onClick={() => navigateTo("landing")}
               >
-                🏠 Landing
+                Landing
               </button>
               <button
                 className="nav-btn"
                 onClick={() => navigateTo("admin")}
               >
-                📊 Admin Dashboard
+                Admin Dashboard
               </button>
               <button
                 className="nav-btn"
                 onClick={() => navigateTo("agent-queue")}
               >
-                🚨 Agent Queue
+                Agent Queue
               </button>
             </div>
           </div>
