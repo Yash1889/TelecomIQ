@@ -9,6 +9,12 @@ from app.agents.complaint_matcher import find_similar_complaints
 from app.services.rag_engine import rag_engine
 from app.agents.gemini_client import async_ask_ai
 
+# ── New NLP metadata extraction agents ────────────────────────────────────── #
+from app.agents.ner_extractor import extract_entities
+from app.agents.keyword_extractor import extract_keywords
+from app.agents.speaker_identifier import identify_speakers
+from app.agents.time_segmenter import segment_by_time
+
 async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     """
     TelecomIQ Orchestrated Intelligence Pipeline.
@@ -39,7 +45,11 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
             "steps": [
                 {"step": "Input Validation", "status": "Insufficient complaint information detected"}
             ],
-            "is_anomaly": False
+            "is_anomaly": False,
+            "named_entities":    {},
+            "keywords":          {},
+            "speaker_analysis":  {},
+            "time_segmentation": {},
         }
 
     # 2. Local ML Classification & VADER Sentiment Analysis
@@ -66,10 +76,39 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     kb_context = rag_res["context"]
     kb_sources = rag_res["sources"]
 
+    # 6. NLP Metadata Extraction (NER, Keywords, Speaker ID, Time Segmentation)
+    #    Run all four in parallel to keep latency minimal
+    ner_res, kw_res, speaker_res, time_res = await asyncio.gather(
+        extract_entities(text),
+        extract_keywords(text, top_n=10),
+        identify_speakers(text),
+        segment_by_time(text),
+        return_exceptions=True,
+    )
+    # Gracefully handle any individual agent failure
+    if isinstance(ner_res, Exception):
+        print(f"⚠️  NER agent error: {ner_res}")
+        ner_res = {}
+    if isinstance(kw_res, Exception):
+        print(f"⚠️  Keyword agent error: {kw_res}")
+        kw_res = {}
+    if isinstance(speaker_res, Exception):
+        print(f"⚠️  Speaker agent error: {speaker_res}")
+        speaker_res = {}
+    if isinstance(time_res, Exception):
+        print(f"⚠️  Time segmenter error: {time_res}")
+        time_res = {}
+
     # Target SLA calculation
     sla_hours = 2 if priority == "CRITICAL" else (6 if priority == "HIGH" else (12 if priority == "MEDIUM" else 24))
 
-    # 6. Grounded Resolution & Response Generation
+    # 7. Grounded Resolution & Response Generation
+    # Include NLP metadata in LLM prompt for richer grounding
+    keyword_summary = ", ".join(kw_res.get("keywords", [])[:5]) if kw_res else "N/A"
+    entity_orgs     = ", ".join(ner_res.get("organizations", [])[:3]) if ner_res else "N/A"
+    entity_locs     = ", ".join(ner_res.get("locations", [])[:3]) if ner_res else "N/A"
+    time_summary    = time_res.get("timeline_summary", "N/A") if time_res else "N/A"
+
     llm_prompt = f"""
 You are TelecomIQ's Senior Telecom Operations Specialist.
 Analyze the following complaint and return ONLY valid JSON.
@@ -79,6 +118,9 @@ Category: {category} (Confidence: {cat_confidence}%)
 Sentiment: {sentiment} (Score: {sent_score})
 Priority: {priority} (Escalation Risk: {escalation_risk_score}%)
 Escalation Reasons: {', '.join(escalation_reasons)}
+Key Topics: {keyword_summary}
+Entities Mentioned: Organizations={entity_orgs}, Locations={entity_locs}
+Temporal Context: {time_summary}
 Telecom SOP Grounding:
 {kb_context}
 
@@ -117,6 +159,10 @@ Return EXACT JSON format with these exact keys:
         {"step": "Priority & Risk Model", "status": f"Priority: {priority} | Escalation Risk: {escalation_risk_score}%"},
         {"step": "Vector Historical Search", "status": f"Retrieved {len(similar_complaints)} matching historical tickets"},
         {"step": "Grounding RAG Engine", "status": f"SOP sources: {', '.join(kb_sources[:2]) if kb_sources else 'Telecom Operational SOP'}"},
+        {"step": "NER Extraction", "status": f"Entities: {ner_res.get('entity_count', 0)} found | Orgs: {entity_orgs}"},
+        {"step": "Keyword Extraction", "status": f"Keywords: {keyword_summary}"},
+        {"step": "Speaker Identification", "status": f"Format: {speaker_res.get('transcript_format','N/A')} | Speakers: {', '.join(speaker_res.get('speakers', ['Customer']))}"},
+        {"step": "Time Segmentation", "status": f"Segments: {time_res.get('total_segments', 1)} | {time_summary[:80]}"},
         {"step": "Resolution & Response", "status": "Grounded resolution recommendation generated"}
     ]
 
@@ -138,5 +184,10 @@ Return EXACT JSON format with these exact keys:
         "similar_issues": similar_complaints,
         "kb_sources": kb_sources,
         "steps": steps,
-        "is_anomaly": escalation_required
+        "is_anomaly": escalation_required,
+        # ── New NLP metadata ────────────────────────────────────────────── #
+        "named_entities":    ner_res,
+        "keywords":          kw_res,
+        "speaker_analysis":  speaker_res,
+        "time_segmentation": time_res,
     }
