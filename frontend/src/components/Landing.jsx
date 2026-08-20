@@ -317,29 +317,29 @@ export default function Landing({ user, onStart, onNavigate }) {
           <div className="vision-box" data-aos="fade-up">
             <div className="section-tag">Our Vision</div>
             <h2 className="vision-text">
-              To redefine the global standard of customer success through autonomous AI intelligence.
+              To make telecom complaint resolution faster, fairer, and fully automated through AI.
             </h2>
           </div>
 
           <div className="mission-content">
             <div className="mission-card" data-aos="fade-right">
               <div className="section-tag">Our Mission</div>
-              <h3 className="mission-title">Empowering Enterprises with Agentic Precision</h3>
+              <h3 className="mission-title">Intelligent Triage for Every Telecom Complaint</h3>
               <p className="mission-description">
-                Our mission is to bridge the gap between complex technical logic and human-centric service.
-                We deploy high-frequency agentic clusters that analyze, classify, and resolve issues with
-                surgical precision. By combining emotional intelligence with recursive reasoning, we ensure
-                that every customer feels heard, valued, and satisfied in real-time, reducing resolution
-                cycles from days to mere seconds.
+                TelecomIQ processes raw subscriber complaint text through a 7-stage LangGraph pipeline —
+                classifying the issue, detecting sentiment, scoring escalation risk, retrieving similar
+                historical tickets, grounding the response in domain SOPs, and generating a resolution
+                recommendation and ticket summary automatically. Every complaint is handled consistently,
+                transparently, and with full audit trail.
               </p>
               <div className="mission-stats">
                 <div className="stat-item">
-                  <span className="stat-value">98%</span>
-                  <span className="stat-label">Surgical Accuracy</span>
+                  <span className="stat-value">89.1%</span>
+                  <span className="stat-label">Classifier Accuracy</span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-value">&lt; 2s</span>
-                  <span className="stat-label">Response Latency</span>
+                  <span className="stat-value">2,204</span>
+                  <span className="stat-label">Training Records</span>
                 </div>
               </div>
             </div>
@@ -562,15 +562,25 @@ export default function Landing({ user, onStart, onNavigate }) {
               </div>
               <span className="logo-text">TelecomIQ</span>
             </div>
-            <h3 className="connect-title">Connect With Us</h3>
-            <div className="social-links-premium2">
-              <a href="https://github.com/Yash1889" target="_blank" rel="noopener noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" /></svg></a>
-              <a href="https://www.linkedin.com/in/yash-raj-gupta001/" target="_blank" rel="noopener noreferrer"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg></a>
-            </div>
+            <p style={{ fontSize: '0.85rem', opacity: 0.7, lineHeight: 1.6, maxWidth: '280px' }}>
+              AI-powered telecom complaint intelligence platform. Classifies, prioritises, and resolves customer complaints automatically using LangGraph, BERT/DistilBERT, and RAG.
+            </p>
+          </div>
+          <div className="footer-section">
+            <h4>Navigate</h4>
+            <button onClick={() => onNavigate('form')} className="footer-btn">File a Complaint</button>
+            <button onClick={() => onNavigate('admin')} className="footer-btn">Admin Dashboard</button>
+            <button onClick={() => onNavigate('agent-queue')} className="footer-btn">Agent Queue</button>
+          </div>
+          <div className="footer-section">
+            <h4>Project</h4>
+            <button onClick={() => scrollToSection('features')} className="footer-btn">Features</button>
+            <button onClick={() => scrollToSection('goals')} className="footer-btn">Pipeline Stats</button>
+            <button onClick={() => scrollToSection('solutions-demo')} className="footer-btn">Demo Scenarios</button>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2025 TelecomIQ. Powered by Agentic Reasoning Clusters.</p>
+          <p>&copy; 2025 TelecomIQ — Telecom Complaint Intelligence & Automated Resolution Assistant</p>
         </div>
       </footer>
 
