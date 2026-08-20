@@ -51,6 +51,18 @@ export default function ComplaintForm({ onResult, user }) {
       cat: "Billing Dispute",
       sub: "Double deduction on monthly fiber broadband bill",
       desc: "Charged twice ₹1,499 on my credit card for the current billing cycle. Unauthorized VAS fee of ₹299 also added to invoice."
+    },
+    {
+      title: "Call Drops",
+      cat: "Call Drops",
+      sub: "Calls dropping every few minutes in residential area",
+      desc: "Every voice call drops within 2-3 minutes of connecting. This has been happening for the past 4 days in my area. VoLTE is enabled but the issue persists."
+    },
+    {
+      title: "Service Outage",
+      cat: "Service Outage",
+      sub: "Complete network outage in entire building since morning",
+      desc: "No mobile signal or internet across our entire apartment complex since 8 AM today. Multiple residents are affected. This is impacting work-from-home connectivity urgently."
     }
   ];
 
@@ -86,11 +98,13 @@ export default function ComplaintForm({ onResult, user }) {
     setShowReview(false);
 
     setSteps([
-      { name: "Telecom ML Classification & Confidence Evaluation...", status: "active" },
-      { name: "Sentiment & Polarity Emotion Analyzer...", status: "waiting" },
-      { name: "Multi-Factor Severity & Escalation Risk Scoring...", status: "waiting" },
-      { name: "RAG Vector Semantic Search Over Historical Tickets...", status: "waiting" },
-      { name: "Grounding Resolution Recommendations & SLA Timeline...", status: "waiting" }
+      { name: "Input Validation — checking complaint sufficiency...", status: "active" },
+      { name: "ML Classification — TF-IDF + Logistic Regression...", status: "waiting" },
+      { name: "Sentiment Analysis — VADER polarity scoring...", status: "waiting" },
+      { name: "Priority & Escalation Risk — multi-factor scoring...", status: "waiting" },
+      { name: "Vector Search — cosine similarity over 2,200+ tickets...", status: "waiting" },
+      { name: "RAG Knowledge Base — telecom SOP retrieval...", status: "waiting" },
+      { name: "GenAI Triage — resolution & ticket summary generation...", status: "waiting" }
     ]);
 
     try {
@@ -101,14 +115,16 @@ export default function ComplaintForm({ onResult, user }) {
         ));
       };
 
-      setTimeout(() => updateStep(0), 400);
-      setTimeout(() => updateStep(1), 900);
-      setTimeout(() => updateStep(2), 1500);
+      setTimeout(() => updateStep(0), 300);
+      setTimeout(() => updateStep(1), 700);
+      setTimeout(() => updateStep(2), 1100);
+      setTimeout(() => updateStep(3), 1500);
 
       const res = await submitComplaint(formData.name, formData.email, formData.subject, formData.description);
 
-      updateStep(3);
       updateStep(4);
+      updateStep(5);
+      updateStep(6);
 
       setTicketId(res.ticket_id);
       if (typeof onResult === "function") onResult(res);
