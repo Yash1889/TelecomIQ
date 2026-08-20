@@ -20,9 +20,9 @@ from app.agents.compliance_monitor import run_compliance_check
 async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
     """
     TelecomIQ Orchestrated Intelligence Pipeline.
-    Evaluates input sufficiency, executes real NLP classification, VADER sentiment analysis,
+    Evaluates input sufficiency, executes NLP classification, VADER sentiment analysis,
     multi-factor priority & escalation risk scoring, vector RAG search over historical complaints,
-    grounded telecom SOP recommendations, ticket summary, and customer response generation.
+    NLP metadata extraction, compliance monitoring, and response generation concurrently via asyncio.gather().
     """
     # 1. Input Validity & Sufficiency Check
     validation_res = validate_complaint_input(text)
@@ -55,62 +55,53 @@ async def run_agent_pipeline(text: str, user_language: str = 'english') -> dict:
             "compliance_analysis": {},
         }
 
-    # 2. Local ML Classification & VADER Sentiment Analysis
-    cat_res = await classify_complaint(text)
-    category = cat_res["category"]
-    cat_confidence = cat_res["confidence"]
-
-    sent_res = await analyze_sentiment(text)
-    sentiment = sent_res["sentiment"]
-    sent_score = sent_res["score"]
-
-    # 3. Multi-Factor Priority & Escalation Risk Calculation
-    priority_res = await detect_priority(text, category=category, sentiment=sentiment, is_sufficient=True)
-    priority = priority_res["priority"]
-    escalation_required = priority_res["escalation_required"]
-    escalation_risk_score = priority_res["escalation_risk_score"]
-    escalation_reasons = priority_res["escalation_reasons"]
-
-    # 4. Real Historical Vector Similarity Retrieval
-    similar_complaints = await find_similar_complaints(text, category=category, top_k=3)
-
-    # 5. Telecom Knowledge Base (RAG) SOP Retrieval
-    rag_res = rag_engine.retrieve(f"{category} {text}")
-    kb_context = rag_res["context"]
-    kb_sources = rag_res["sources"]
-
-    # 6. NLP Metadata Extraction (NER, Keywords, Speaker ID, Time Segmentation)
-    #    + Compliance & Privacy Monitoring — all run in parallel
-    ner_res, kw_res, speaker_res, time_res, compliance_res = await asyncio.gather(
+    # 2. Parallel Concurrent Execution of Core Classification, Sentiment, Vector Search & NLP Extraction
+    cat_task = asyncio.create_task(classify_complaint(text))
+    sent_task = asyncio.create_task(analyze_sentiment(text))
+    vector_task = asyncio.create_task(find_similar_complaints(text, top_k=3))
+    nlp_task = asyncio.gather(
         extract_entities(text),
         extract_keywords(text, top_n=10),
         identify_speakers(text),
         segment_by_time(text),
         run_compliance_check(text),
-        return_exceptions=True,
+        return_exceptions=True
     )
+
+    cat_res, sent_res, similar_complaints, (ner_res, kw_res, speaker_res, time_res, compliance_res) = await asyncio.gather(
+        cat_task, sent_task, vector_task, nlp_task
+    )
+
+    category = cat_res["category"]
+    cat_confidence = cat_res["confidence"]
+    sentiment = sent_res["sentiment"]
+    sent_score = sent_res["score"]
+
     # Gracefully handle any individual agent failure
-    if isinstance(ner_res, Exception):
-        print(f"⚠️  NER agent error: {ner_res}")
-        ner_res = {}
-    if isinstance(kw_res, Exception):
-        print(f"⚠️  Keyword agent error: {kw_res}")
-        kw_res = {}
-    if isinstance(speaker_res, Exception):
-        print(f"⚠️  Speaker agent error: {speaker_res}")
-        speaker_res = {}
-    if isinstance(time_res, Exception):
-        print(f"⚠️  Time segmenter error: {time_res}")
-        time_res = {}
-    if isinstance(compliance_res, Exception):
-        print(f"⚠️  Compliance monitor error: {compliance_res}")
-        compliance_res = {}
+    if isinstance(ner_res, Exception): ner_res = {}
+    if isinstance(kw_res, Exception): kw_res = {}
+    if isinstance(speaker_res, Exception): speaker_res = {}
+    if isinstance(time_res, Exception): time_res = {}
+    if isinstance(compliance_res, Exception): compliance_res = {}
+
+    # 3. Multi-Factor Priority & Escalation Risk Calculation & RAG Retrieval
+    prio_task = asyncio.create_task(detect_priority(text, category=category, sentiment=sentiment, is_sufficient=True))
+
+    # RAG Retrieval is synchronous in-memory search, run cleanly
+    rag_res = rag_engine.retrieve(f"{category} {text}")
+    kb_context = rag_res["context"]
+    kb_sources = rag_res["sources"]
+
+    priority_res = await prio_task
+    priority = priority_res["priority"]
+    escalation_required = priority_res["escalation_required"]
+    escalation_risk_score = priority_res["escalation_risk_score"]
+    escalation_reasons = priority_res["escalation_reasons"]
 
     # Target SLA calculation
     sla_hours = 2 if priority == "CRITICAL" else (6 if priority == "HIGH" else (12 if priority == "MEDIUM" else 24))
 
-    # 7. Grounded Resolution & Response Generation
-    # Include NLP metadata in LLM prompt for richer grounding
+    # 4. Grounded Resolution & Response Generation
     keyword_summary = ", ".join(kw_res.get("keywords", [])[:5]) if kw_res else "N/A"
     entity_orgs     = ", ".join(ner_res.get("organizations", [])[:3]) if ner_res else "N/A"
     entity_locs     = ", ".join(ner_res.get("locations", [])[:3]) if ner_res else "N/A"

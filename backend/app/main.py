@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
 import os
-
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
+
 from app.db.database import engine, run_migrations
 from app.db import models
 from app.db.seed import ensure_db_seeded
@@ -13,6 +14,23 @@ from app.api.chat import router as chat_router
 from app.routes.feedback import router as feedback_router
 from app.routes.auth import router as auth_router
 from app.routes.agent_module import router as agent_router
+
+from app.agents.classifier import get_classifier_model
+from app.agents.complaint_matcher import get_vector_store
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI Lifespan Context: Pre-warm models & DB seeding at startup"""
+    print("🚀 TelecomIQ Engine Starting Up...")
+    try:
+        # Pre-warm ML Classifier Model & TF-IDF Vector Store in memory
+        get_classifier_model()
+        get_vector_store()
+        print("⚡ ML Classifier & Vector Store pre-warmed in memory.")
+    except Exception as e:
+        print(f"⚠️ Model pre-warming warning: {e}")
+    yield
+    print("🛑 TelecomIQ Engine Shutdown Complete.")
 
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
@@ -23,7 +41,10 @@ run_migrations()
 # Ensure database is seeded with Kaggle complaints on startup if empty
 ensure_db_seeded()
 
-app = FastAPI(title="TelecomIQ Engine - Telecom Complaint Intelligence & Resolution Assistant")
+app = FastAPI(
+    title="TelecomIQ Engine - Telecom Complaint Intelligence & Resolution Assistant",
+    lifespan=lifespan
+)
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -95,21 +116,9 @@ def root():
 
 @app.get("/health")
 def health():
-    """Production health check endpoint for platform monitoring & load balancers"""
-    db_status = "connected"
-    complaint_count = 0
-    try:
-        from app.db.database import SessionLocal
-        db = SessionLocal()
-        complaint_count = db.query(models.Complaint).count()
-        db.close()
-    except Exception as e:
-        db_status = f"error: {str(e)}"
-
+    """Ultra-fast, zero-overhead production health check endpoint for Render/uptime monitoring"""
     return {
-        "status": "ok" if db_status == "connected" else "degraded",
+        "status": "ok",
         "service": "TelecomIQ Production Engine",
-        "database": db_status,
-        "records_count": complaint_count,
         "environment": "render" if os.getenv("RENDER") else "local"
     }

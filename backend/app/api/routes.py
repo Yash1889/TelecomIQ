@@ -359,11 +359,12 @@ async def submit_resolution_feedback(
 @router.get("/analytics")
 def get_telecom_analytics(db: Session = Depends(get_db)):
     """
-    Get real-time telecom analytics metrics computed from current database records.
+    Get real-time telecom analytics metrics computed via fast SQL aggregations.
     """
     try:
-        all_complaints = db.query(Complaint).all()
-        total_count = len(all_complaints)
+        from sqlalchemy import func
+
+        total_count = db.query(func.count(Complaint.id)).scalar() or 0
         if total_count == 0:
             return {
                 "total_complaints": 0,
@@ -376,25 +377,22 @@ def get_telecom_analytics(db: Session = Depends(get_db)):
                 "priorities": {}
             }
 
-        solved_count = sum(1 for c in all_complaints if c.is_resolved)
+        solved_count = db.query(func.count(Complaint.id)).filter(Complaint.is_resolved == True).scalar() or 0
         open_count = total_count - solved_count
-        escalated_count = sum(1 for c in all_complaints if getattr(c, 'escalation_required', False) or c.priority in ['High', 'CRITICAL', 'P1', 'P2'])
-        negative_count = sum(1 for c in all_complaints if c.sentiment in ['Angry', 'Negative'])
+        escalated_count = db.query(func.count(Complaint.id)).filter(
+            (Complaint.escalation_required == True) | (Complaint.priority.in_(["HIGH", "CRITICAL", "High", "P1", "P2"]))
+        ).scalar() or 0
+        negative_count = db.query(func.count(Complaint.id)).filter(Complaint.sentiment.in_(["Angry", "Negative"])).scalar() or 0
         negative_pct = round((negative_count / total_count) * 100, 1)
 
-        category_counts = {}
-        sentiment_counts = {}
-        priority_counts = {}
+        cat_rows = db.query(Complaint.category, func.count(Complaint.id)).group_by(Complaint.category).all()
+        category_counts = {cat or "Network Connectivity": cnt for cat, cnt in cat_rows}
 
-        for c in all_complaints:
-            cat = c.category or "Network Connectivity"
-            category_counts[cat] = category_counts.get(cat, 0) + 1
+        sent_rows = db.query(Complaint.sentiment, func.count(Complaint.id)).group_by(Complaint.sentiment).all()
+        sentiment_counts = {sent or "Neutral": cnt for sent, cnt in sent_rows}
 
-            sent = c.sentiment or "Neutral"
-            sentiment_counts[sent] = sentiment_counts.get(sent, 0) + 1
-
-            prio = c.priority or "Medium"
-            priority_counts[prio] = priority_counts.get(prio, 0) + 1
+        prio_rows = db.query(Complaint.priority, func.count(Complaint.id)).group_by(Complaint.priority).all()
+        priority_counts = {prio or "Medium": cnt for prio, cnt in prio_rows}
 
         return {
             "total_complaints": total_count,
