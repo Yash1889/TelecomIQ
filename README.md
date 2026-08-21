@@ -108,7 +108,7 @@ Customer Complaint
 | Vector DB / RAG | TF-IDF cosine similarity over 2,200+ complaints + 11 SOP docs |
 | Backend | FastAPI + SQLAlchemy + SQLite/PostgreSQL |
 | Frontend | React 19 + Vite |
-| Deployment | Render (backend) + Vercel (frontend) |
+| Deployment | Vercel (frontend + backend) |
 
 ---
 

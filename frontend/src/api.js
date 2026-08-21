@@ -2,8 +2,8 @@ import axios from "axios";
 
 // Automatically resolve the backend URL:
 // 1. Explicit VITE_API_URL environment variable if provided
-// 2. Production Render backend when running on hosted domain (Vercel, custom domain)
-// 3. Localhost for local development
+// 2. Localhost for local development
+// 3. Hosted Vercel backend in production
 const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;

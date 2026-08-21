@@ -52,7 +52,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
     )
 
-IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production" or bool(os.getenv("RENDER"))
+IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production" or bool(os.getenv("VERCEL"))
 
 # Origins allowed
 ALLOWED_ORIGINS = [
@@ -78,7 +78,7 @@ for origin in extra_origins.split(","):
 
 ALLOWED_ORIGINS = list(dict.fromkeys(o for o in ALLOWED_ORIGINS if o != "*"))
 
-# Allow all HTTPS origins via regex to support Render, Vercel, Railway, and Netlify deployments
+# Allow all HTTPS origins via regex to support Vercel, custom domain, and preview deployments
 ALLOWED_ORIGIN_REGEX = r"https://.*"
 
 app.add_middleware(

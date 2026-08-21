@@ -18,10 +18,9 @@ def get_ist_time():
 DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("TURSO_DATABASE_URL") or ""
 
 # A local SQLite file is fine for development, but on a host with an ephemeral
-# filesystem (Render, Docker without a volume) it is silently wiped on every
-# restart, so every complaint written to it is lost. Refuse to start that way
-# instead of pretending the writes succeeded.
-IS_HOSTED = bool(os.getenv("RENDER") or os.getenv("ENVIRONMENT") == "production")
+# filesystem (Docker / serverless without a persistent volume) writes in the root directory
+# are read-only or wiped on restart.
+IS_HOSTED = bool(os.getenv("VERCEL") or os.getenv("ENVIRONMENT") == "production")
 TURSO_AUTH_TOKEN = None
 if not DATABASE_URL:
     # On Vercel / serverless platforms, current directory is read-only. Use /tmp
@@ -31,7 +30,7 @@ if not DATABASE_URL:
         DATABASE_URL = "sqlite:///complaints.db"
     print(f"[db] NOTICE: Defaulting to SQLite database '{DATABASE_URL}'.")
 
-# ✅ Handle Render/Postgres URL conversion
+# ✅ Handle Postgres URL conversion
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
