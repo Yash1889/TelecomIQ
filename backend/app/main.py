@@ -116,9 +116,10 @@ def root():
 
 @app.get("/health")
 def health():
-    """Ultra-fast, zero-overhead production health check endpoint for Render/uptime monitoring"""
+    """Ultra-fast, zero-overhead production health check endpoint"""
     return {
         "status": "ok",
         "service": "TelecomIQ Production Engine",
-        "environment": "render" if os.getenv("RENDER") else "local"
+        "environment": "production" if os.getenv("VERCEL") or os.getenv("ENVIRONMENT") == "production" else "local"
     }
+

@@ -8,16 +8,15 @@ const getApiBaseUrl = () => {
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL;
   }
-  if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
-    return "https://telecomiq-backend-xv8i.onrender.com";
+  if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+    return "http://localhost:8000";
   }
-  return "http://localhost:8000";
+  return "";
 };
 
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  // 60s timeout accommodates Render free-tier cold-start wakeups
-  timeout: 60000,
+  timeout: 45000,
   headers: {
     "Content-Type": "application/json",
   },
