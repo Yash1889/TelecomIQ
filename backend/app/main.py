@@ -20,26 +20,23 @@ from app.agents.complaint_matcher import get_vector_store
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """FastAPI Lifespan Context: Pre-warm models & DB seeding at startup"""
+    """FastAPI Lifespan Context: Initialize DB & pre-warm models on startup"""
     print("🚀 TelecomIQ Engine Starting Up...")
     try:
+        # Create database tables & run migrations
+        models.Base.metadata.create_all(bind=engine)
+        run_migrations()
+        ensure_db_seeded()
+        print("✅ Database tables, migrations & dataset ready.")
+
         # Pre-warm ML Classifier Model & TF-IDF Vector Store in memory
         get_classifier_model()
         get_vector_store()
         print("⚡ ML Classifier & Vector Store pre-warmed in memory.")
     except Exception as e:
-        print(f"⚠️ Model pre-warming warning: {e}")
+        print(f"⚠️ Startup initialization warning: {e}")
     yield
     print("🛑 TelecomIQ Engine Shutdown Complete.")
-
-# Create database tables
-models.Base.metadata.create_all(bind=engine)
-
-# Run custom migrations (add missing columns)
-run_migrations()
-
-# Ensure database is seeded with Kaggle complaints on startup if empty
-ensure_db_seeded()
 
 app = FastAPI(
     title="TelecomIQ Engine - Telecom Complaint Intelligence & Resolution Assistant",
