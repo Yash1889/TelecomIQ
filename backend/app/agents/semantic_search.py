@@ -1,25 +1,28 @@
 """
-Semantic Similarity using Sentence Transformers
-Uses all-MiniLM-L6-v2: Fast, lightweight, unlimited usage
-Perfect for finding similar complaints and pattern matching
+Semantic Similarity using Sentence Transformers (optional / lazy load)
+Falls back gracefully if sentence_transformers is not installed.
 """
-from sentence_transformers import SentenceTransformer, util
 import logging
 import numpy as np
 
 class SemanticSimilarityEngine:
     def __init__(self):
+        self.model = None
+        self.complaint_cache = []
+        self.embedding_cache = []
+        self._initialized = False
+
+    def _load_model(self):
+        if self._initialized:
+            return
+        self._initialized = True
         try:
-            # all-MiniLM-L6-v2: 80MB model, 5x faster than BERT, 384-dim embeddings
-            # Why? Optimized for semantic search with minimal resource usage
+            from sentence_transformers import SentenceTransformer, util
+            self.util = util
             self.model = SentenceTransformer('all-MiniLM-L6-v2')
             logging.info("✅ Sentence Transformer Model Loaded")
-            
-            # Cache for historical complaint embeddings
-            self.complaint_cache = []
-            self.embedding_cache = []
         except Exception as e:
-            logging.error(f"Failed to load sentence transformer: {e}")
+            logging.info(f"Sentence transformer optional fallback: {e}")
             self.model = None
 
     def find_similar(self, query: str, candidates: list, top_k: int = 3) -> list:
@@ -27,25 +30,22 @@ class SemanticSimilarityEngine:
         Find most similar texts from candidates
         Returns: List of (text, similarity_score) tuples
         """
+        self._load_model()
         if not self.model or not query or not candidates:
             return []
         
         try:
             query_embedding = self.model.encode(query, convert_to_tensor=True)
             candidate_embeddings = self.model.encode(candidates, convert_to_tensor=True)
+            similarities = self.util.cos_sim(query_embedding, candidate_embeddings)[0]
             
-            # Compute cosine similarities
-            similarities = util.cos_sim(query_embedding, candidate_embeddings)[0]
-            
-            # Get top-k results
             top_results = []
             for idx in similarities.argsort(descending=True)[:top_k]:
-                if similarities[idx] > 0.3:  # Minimum similarity threshold
+                if similarities[idx] > 0.3:
                     top_results.append({
                         "text": candidates[idx],
                         "similarity": float(similarities[idx])
                     })
-            
             return top_results
         except Exception as e:
             logging.error(f"Similarity search error: {e}")
@@ -53,6 +53,7 @@ class SemanticSimilarityEngine:
 
     def add_to_cache(self, complaint: str):
         """Add complaint to historical cache for future similarity searches"""
+        self._load_model()
         if self.model and complaint:
             try:
                 embedding = self.model.encode(complaint)
@@ -73,3 +74,4 @@ def find_similar_complaints_local(query: str, candidates: list = None, top_k: in
 def cache_complaint(complaint: str):
     """Cache complaint for future similarity matching"""
     similarity_engine.add_to_cache(complaint)
+

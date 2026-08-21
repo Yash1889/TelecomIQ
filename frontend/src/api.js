@@ -1,20 +1,28 @@
 import axios from "axios";
 
+// Automatically resolve the backend URL:
+// 1. Explicit VITE_API_URL environment variable if provided
+// 2. Production Render backend when running on hosted domain (Vercel, custom domain)
+// 3. Localhost for local development
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
+    return "https://telecomiq-backend-xv8i.onrender.com";
+  }
+  return "http://localhost:8000";
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
-  // Fail fast instead of hanging forever if the backend/AI is slow.
-  // The chat backend caps its own work at ~15s, so 30s is safe headroom.
-  timeout: 30000,
+  baseURL: getApiBaseUrl(),
+  // 60s timeout accommodates Render free-tier cold-start wakeups
+  timeout: 60000,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// The backend runs on Render's free tier, which spins the container down after
-// ~15 min idle. The first request then pays a 30-60s cold-start boot. Auth is
-// usually that first request, so it gets a longer timeout — otherwise a healthy
-// login fails with a misleading "Failed to trigger OTP email" while the server
-// is merely waking up.
 const AUTH_TIMEOUT = 90000;
 
 export const submitComplaint = async (name, email, subject, description) => {

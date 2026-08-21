@@ -59,6 +59,9 @@ IS_PRODUCTION = os.getenv("ENVIRONMENT") == "production" or bool(os.getenv("REND
 
 # Origins allowed
 ALLOWED_ORIGINS = [
+    "https://telecom-iq.vercel.app",
+    "https://telecomiq.vercel.app",
+    "https://telecomiq-backend-xv8i.onrender.com",
     "https://riteshkr.online",
     "http://riteshkr.online",
     "https://www.riteshkr.online",
