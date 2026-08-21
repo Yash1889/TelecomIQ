@@ -24,8 +24,12 @@ DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("TURSO_DATABASE_URL") or "
 IS_HOSTED = bool(os.getenv("RENDER") or os.getenv("ENVIRONMENT") == "production")
 TURSO_AUTH_TOKEN = None
 if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///complaints.db"
-    print("[db] NOTICE: No DATABASE_URL set. Defaulting to local SQLite database 'complaints.db'.")
+    # On Vercel / serverless platforms, current directory is read-only. Use /tmp
+    if os.getenv("VERCEL") or not os.access(".", os.W_OK):
+        DATABASE_URL = "sqlite:////tmp/complaints.db"
+    else:
+        DATABASE_URL = "sqlite:///complaints.db"
+    print(f"[db] NOTICE: Defaulting to SQLite database '{DATABASE_URL}'.")
 
 # ✅ Handle Render/Postgres URL conversion
 if DATABASE_URL.startswith("postgres://"):
@@ -74,7 +78,10 @@ elif DATABASE_URL.startswith("libsql://"):
                 "DATABASE_URL points at Turso but sqlalchemy-libsql is not installed. "
                 "Install it (>=0.2.0) so writes reach Turso instead of a disposable file."
             )
-        DATABASE_URL = "sqlite:///complaints.db"
+        if os.getenv("VERCEL") or not os.access(".", os.W_OK):
+            DATABASE_URL = "sqlite:////tmp/complaints.db"
+        else:
+            DATABASE_URL = "sqlite:///complaints.db"
         TURSO_AUTH_TOKEN = None
         print(
             "[db] WARNING: sqlalchemy-libsql is unavailable (no Windows wheel). "
