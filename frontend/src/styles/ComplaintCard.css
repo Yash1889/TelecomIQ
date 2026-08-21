@@ -151,7 +151,8 @@ body.light-theme .similar-section {
   animation-delay: 0.4s;
 }
 
-.section-title {
+.complaint-card .section-title,
+.complaint-card-container .section-title {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -161,7 +162,8 @@ body.light-theme .similar-section {
   margin-bottom: 14px;
 }
 
-.section-title span {
+.complaint-card .section-title span,
+.complaint-card-container .section-title span {
   font-size: 20px;
 }
 
@@ -215,11 +217,13 @@ body.light-theme .similar-section {
     padding: 18px;
   }
 
-  .section-title {
+  .complaint-card .section-title,
+  .complaint-card-container .section-title {
     font-size: 14px;
   }
 
-  .section-title span {
+  .complaint-card .section-title span,
+  .complaint-card-container .section-title span {
     font-size: 18px;
   }
 }

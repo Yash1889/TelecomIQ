@@ -606,14 +606,24 @@ body.light-theme .feature-mini-text span {
 /* ==========================================================================
    Section Headers & Shared Tags
    ========================================================================== */
-.section-header {
+.section-header,
+.landing-container .section-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   max-width: 850px;
-  margin: 0 auto 3.5rem;
+  margin: 0 auto 3.5rem auto;
+  width: 100%;
 }
 
-.section-tag {
-  display: inline-block;
+.section-tag,
+.landing-container .section-tag,
+.section-header .section-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.35rem 1rem;
   background: rgba(59, 130, 246, 0.14);
   border: 1px solid rgba(96, 165, 250, 0.35);
@@ -623,46 +633,67 @@ body.light-theme .feature-mini-text span {
   text-transform: uppercase;
   letter-spacing: 1.2px;
   color: #93c5fd;
-  margin-bottom: 0.9rem;
+  margin: 0 auto 0.9rem auto;
+  align-self: center;
 }
 
-body.light-theme .section-tag {
+body.light-theme .section-tag,
+body.light-theme .landing-container .section-tag,
+body.light-theme .section-header .section-tag {
   background: #eff6ff;
   border-color: #bfdbfe;
   color: #1d4ed8;
 }
 
 /* HIGH-CONTRAST SECTION TITLES */
-.section-title {
-  font-size: clamp(2rem, 4vw, 2.75rem);
-  font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 0.85rem;
-  letter-spacing: -0.03em;
+.section-title,
+.landing-container .section-title,
+.section-header .section-title {
+  display: block !important;
+  text-align: center !important;
+  width: 100%;
+  font-size: clamp(2rem, 4vw, 2.75rem) !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  margin: 0 auto 0.85rem auto !important;
+  letter-spacing: -0.03em !important;
   color: #ffffff !important;
 }
 
-body.light-theme .section-title {
+body.light-theme .section-title,
+body.light-theme .landing-container .section-title,
+body.light-theme .section-header .section-title {
   color: #0f172a !important;
 }
 
-.section-title span {
+.section-title span,
+.landing-container .section-title span,
+.section-header .section-title span {
+  display: inline !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
   background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
   background-clip: text !important;
 }
 
-.section-subtitle {
-  font-size: 1.05rem;
-  color: #cbd5e1;
-  line-height: 1.65;
-  max-width: 740px;
-  margin: 0 auto;
+.section-subtitle,
+.landing-container .section-subtitle,
+.section-header .section-subtitle {
+  display: block !important;
+  text-align: center !important;
+  font-size: 1.05rem !important;
+  color: #cbd5e1 !important;
+  line-height: 1.65 !important;
+  max-width: 740px !important;
+  margin: 0 auto !important;
 }
 
-body.light-theme .section-subtitle {
-  color: #475569;
+body.light-theme .section-subtitle,
+body.light-theme .landing-container .section-subtitle,
+body.light-theme .section-header .section-subtitle {
+  color: #475569 !important;
 }
 
 /* ==========================================================================

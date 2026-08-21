@@ -462,7 +462,8 @@ body.light-theme .chart-card {
   /* Thoda space upar se */
 }
 
-.section-title {
+.recent-section .section-title,
+.dashboard-container .section-title {
   font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
