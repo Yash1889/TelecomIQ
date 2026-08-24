@@ -29,8 +29,8 @@ def run_ml_audit():
     raw_count = len(df_raw)
     print(f"📊 Dataset Loaded: {raw_count} Total Records from Kaggle Telecom Dataset")
 
-    # Combine text features
-    df_raw['full_text'] = df_raw['subject'].fillna('') + " " + df_raw['description'].fillna('')
+    # Combine text features cleanly
+    df_raw['full_text'] = (df_raw['subject'].fillna('').astype(str) + " " + df_raw['description'].fillna('').astype(str)).str.strip()
 
     # Deduplication BEFORE Splitting
     df_clean = df_raw.drop_duplicates(subset=['full_text']).copy()
@@ -109,15 +109,15 @@ def run_ml_audit():
 
     test_preds = model_pipeline.predict(X_test)
     test_acc = accuracy_score(y_test, test_preds)
-    test_p, test_r, test_f1, _ = precision_recall_fscore_support(y_test, test_preds, average='weighted')
-    macro_p, macro_r, macro_f1, _ = precision_recall_fscore_support(y_test, test_preds, average='macro')
+    test_p, test_r, test_f1, _ = precision_recall_fscore_support(y_test, test_preds, average='weighted', zero_division=0)
+    macro_p, macro_r, macro_f1, _ = precision_recall_fscore_support(y_test, test_preds, average='macro', zero_division=0)
 
     print(f"• Validation Set Accuracy: {val_acc*100:.2f}%")
     print(f"• Test Set Accuracy:       {test_acc*100:.2f}%")
     print(f"• Test Weighted F1-Score:  {test_f1:.4f}")
     print(f"• Test Macro F1-Score:     {macro_f1:.4f}")
 
-    test_report = classification_report(y_test, test_preds, digits=4)
+    test_report = classification_report(y_test, test_preds, digits=4, zero_division=0)
     print("\nClassification Report on Unseen Test Set (15% Split):\n")
     print(test_report)
 
@@ -145,7 +145,7 @@ def run_ml_audit():
         f.write("CLASS DISTRIBUTION PER SPLIT:\n")
         f.write(split_df.to_string(index=False) + "\n\n")
         f.write("CLASSIFICATION REPORT (UNSEEN TEST SET):\n")
-        f.write(test_report + "\n\n")
+        f.write(str(test_report) + "\n\n")
         f.write("CONFUSION MATRIX:\n")
         f.write(cm_df.to_string() + "\n")
 

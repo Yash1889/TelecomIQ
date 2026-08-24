@@ -1,3 +1,4 @@
+import ComplaintCard from "./ComplaintCard";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAllComplaints, deleteAllComplaints, updateComplaintStatus, deleteComplaint, bulkDeleteComplaints } from "../api";
@@ -741,10 +742,7 @@ export default function AdminDashboard({ user, onNavigate, onLogout }) {
                                 </div>
 
                                 <div className="admin-modal-section">
-                                    <h3>AI Response</h3>
-                                    <div className="admin-modal-text">
-                                        {selectedComplaint.response || "No response generated"}
-                                    </div>
+                                    <ComplaintCard data={selectedComplaint} />
                                 </div>
 
                                 {/* Admin Solution Input */}

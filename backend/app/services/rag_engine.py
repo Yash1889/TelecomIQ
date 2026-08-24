@@ -39,7 +39,7 @@ class TelecomRAGEngine:
         except Exception as e:
             print(f"❌ RAG Initialization Error: {e}")
 
-    def retrieve(self, query: str, top_k: int = 2) -> Dict:
+    def retrieve(self, query: str, category: str = "", top_k: int = 2) -> Dict:
         """
         Retrieve relevant telecom troubleshooting steps & SLA policies.
         Returns dict with context string and retrieved document metadata.
@@ -54,15 +54,33 @@ class TelecomRAGEngine:
             query_vec = self.vectorizer.transform([query])
             similarities = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
             
+            # Apply domain-matching multiplier if category matches
+            if category:
+                for i, doc in enumerate(self.kb_data):
+                    doc_cat = doc.get("category", "")
+                    if doc_cat.lower() == category.lower():
+                        similarities[i] *= 1.8  # Strong boost for same-category SOPs
+                    elif doc_cat.lower() in ["billing dispute", "service request"] and any(kw in query.lower() for kw in ["bill", "charge", "fee", "deduction", "invoice", "vas", "₹"]):
+                        if doc_cat.lower() == "billing dispute":
+                            similarities[i] *= 1.6
+                    elif any(kw in query.lower() for kw in ["bill", "charge", "fee", "deduction", "invoice", "vas", "₹"]) and "broadband" in doc_cat.lower():
+                        similarities[i] *= 0.2  # De-boost network SOPs when query is purely monetary
+
             top_indices = np.argsort(similarities)[-top_k:][::-1]
             
             snippets = []
             sources = []
             for idx in top_indices:
+                if similarities[idx] < 0.05:
+                    continue
                 doc = self.kb_data[idx]
                 snippets.append(f"[{doc['category']} - {doc['topic']}]: {doc['content']}")
-                sources.append(f"{doc['category']} SOP: {doc['topic']}")
+                sources.append(f"{doc['category']} — {doc['topic']}")
             
+            if not snippets:
+                snippets = ["Follow standard telecom operational guidelines for " + (category or "resolution")]
+                sources = [f"{category or 'Telecom'} Standard Operational Procedure"]
+
             return {
                 "context": "\n\n".join(snippets),
                 "sources": sources

@@ -25,12 +25,14 @@ const api = axios.create({
 
 const AUTH_TIMEOUT = 90000;
 
-export const submitComplaint = async (name, email, subject, description) => {
+export const submitComplaint = async (name, email, subject, description, category = null, user_priority = "MEDIUM") => {
   const response = await api.post("/complaint", {
     name,
     email,
     subject,
     description,
+    category: category || null,
+    user_priority: user_priority || "MEDIUM"
   });
   return response.data;
 };

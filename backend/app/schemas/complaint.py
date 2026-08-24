@@ -5,16 +5,17 @@ from typing import Optional, List, Any, Dict, Union
 
 class ComplaintRequest(BaseModel):
     """Request schema for submitting a complaint."""
-    name:        Optional[str] = ""
-    email:       Optional[str] = ""
-    subject:     Optional[str] = ""
-    description: Optional[str] = ""
-    category:    Optional[str] = "Network Connectivity"
+    name:              Optional[str] = ""
+    email:             Optional[str] = ""
+    subject:           Optional[str] = ""
+    description:       Optional[str] = ""
+    category:          Optional[str] = None
+    user_priority:     Optional[str] = "MEDIUM"
 
 
 class ComplaintResponse(BaseModel):
     """
-    API response schema — contains only outputs required by the official
+    API response schema — contains outputs required by the official
     Telecom Complaint Intelligence use case.
     """
     # Input sufficiency gate
@@ -31,10 +32,19 @@ class ComplaintResponse(BaseModel):
     sentiment_score:       Optional[float]      = 0.0
     # Priority + escalation (spec items 3 & 4)
     priority:              Optional[str]        = "MEDIUM"
+    user_priority:         Optional[str]        = "MEDIUM"
+    priority_reconciliation_note: Optional[str] = ""
     escalation_required:   Optional[bool]       = False
     escalation_risk_score: Optional[float]      = 25.0
     escalation_reasons:    Optional[List[str]]  = []
     # Resolution + summary (spec items 5 & 6)
+    incident_summary:      Optional[str]        = ""
+    likely_cause:          Optional[str]        = ""
+    alternative_causes:    Optional[List[str]]  = []
+    recommended_actions:   Optional[List[str]]  = []
+    customer_impact:       Optional[str]        = ""
+    customer_response:     Optional[str]        = ""
+    resolution_basis:      Optional[str]        = ""
     response:              Optional[str]        = ""
     solution:              Optional[str]        = ""
     ticket_summary:        Optional[str]        = ""

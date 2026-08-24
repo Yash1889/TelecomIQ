@@ -14,14 +14,13 @@ class GroqClient:
     def __init__(self):
         self.api_key = os.getenv("GROQ_API_KEY")
         
-        # Models in order of reasoning capability & speed
+        # Models in order of reasoning capability & speed (Active for this Groq API Key)
         self.models: List[str] = [
-            "llama-3.3-70b-versatile",
-            "llama-3.1-8b-instant",
             "qwen/qwen3.6-27b",
+            "groq/compound",
             "groq/compound-mini",
-            "openai/gpt-oss-20b",
-            "gemma2-9b-it"
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b"
         ]
 
         self.max_fallback_attempts = 4
@@ -105,6 +104,7 @@ class GroqClient:
                 continue
                 
             except Exception as e:
+                print(f"❌ Groq model '{current_model}' error: {type(e).__name__} - {e}")
                 self.mark_model_failed()
                 if attempt < max_attempts - 1:
                     continue

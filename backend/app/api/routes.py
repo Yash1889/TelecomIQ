@@ -28,8 +28,12 @@ async def handle_complaint(
         # Combine subject and description for comprehensive AI analysis
         full_text = f"Subject: {data.subject}\nDescription: {data.description}"
         
-        # Run AI agents pipeline asynchronously
-        result = await run_agent_pipeline(full_text)
+        # Run AI agents pipeline asynchronously with user category & severity inputs
+        result = await run_agent_pipeline(
+            full_text, 
+            user_category=data.category, 
+            user_priority=data.user_priority
+        )
         
         category = result.get("category", "Network Connectivity")
         confidence = result.get("confidence", 92.5)
@@ -97,6 +101,13 @@ async def handle_complaint(
             escalation_required=escalation_required,
             escalation_risk_score=escalation_risk_score,
             escalation_reasons=escalation_reasons,
+            incident_summary=result.get("incident_summary", ticket_summary),
+            likely_cause=result.get("likely_cause", action),
+            alternative_causes=result.get("alternative_causes", []),
+            recommended_actions=result.get("recommended_actions", []),
+            customer_impact=result.get("customer_impact", ""),
+            customer_response=result.get("customer_response", response),
+            resolution_basis=result.get("resolution_basis", ""),
             response=response,
             solution=solution,
             ticket_summary=ticket_summary,

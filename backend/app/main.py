@@ -84,8 +84,8 @@ for origin in extra_origins.split(","):
 
 ALLOWED_ORIGINS = list(dict.fromkeys(o for o in ALLOWED_ORIGINS if o != "*"))
 
-# Allow all HTTPS origins via regex to support Vercel, custom domain, and preview deployments
-ALLOWED_ORIGIN_REGEX = r"https://.*"
+# Allow HTTP and HTTPS origins via regex to support local, Vercel, and preview deployments
+ALLOWED_ORIGIN_REGEX = r"https?://.*"
 
 app.add_middleware(
     CORSMiddleware,

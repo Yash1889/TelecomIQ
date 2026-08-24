@@ -8,7 +8,9 @@ export default function ComplaintForm({ onResult, user }) {
     name: user?.full_name || "",
     email: user?.email || "",
     subject: "",
-    description: ""
+    description: "",
+    category: "",
+    user_priority: "MEDIUM"
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -16,44 +18,65 @@ export default function ComplaintForm({ onResult, user }) {
   const [ticketId, setTicketId] = useState("");
   const [copied, setCopied] = useState(false);
 
+  const sopCategories = [
+    "Broadband Performance",
+    "Billing Dispute",
+    "Service Outage",
+    "Call Drops",
+    "Network Connectivity",
+    "Data / Usage Issue",
+    "Equipment / Router",
+    "Installation",
+    "Customer Service",
+    "Cancellation",
+    "Service Request"
+  ];
+
   const presets = [
     {
       title: "5G Signal Drop",
       cat: "Network Connectivity",
       sub: "5G cellular network drops repeatedly in office building",
-      desc: "My phone continuously drops from 5G to 2G/No Service every 15 minutes inside my office in Electronic City. Emergency calls only shown on screen."
+      desc: "My phone continuously drops from 5G to 2G/No Service every 15 minutes inside my office in Electronic City. Emergency calls only shown on screen.",
+      user_priority: "HIGH"
     },
     {
       title: "Broadband Disconnect",
       cat: "Broadband Performance",
       sub: "Fiber optic connection disconnects every 30 minutes",
-      desc: "Subscribed to 300 Mbps fiber broadband. Optical PON light blinks red every 30 minutes, causing frequent disconnects during remote work."
+      desc: "Subscribed to 300 Mbps fiber broadband. Optical PON light blinks red every 30 minutes, causing frequent disconnects during remote work.",
+      user_priority: "MEDIUM"
     },
     {
       title: "Billing Overcharge",
       cat: "Billing Dispute",
       sub: "Double deduction on monthly fiber broadband bill",
-      desc: "Charged twice ₹1,499 on my credit card for the current billing cycle. Unauthorized VAS fee of ₹299 also added to invoice."
+      desc: "Charged twice ₹1,499 on my credit card for the current billing cycle. Unauthorized VAS fee of ₹299 also added to invoice.",
+      user_priority: "HIGH"
     },
     {
       title: "Call Drops",
       cat: "Call Drops",
       sub: "Calls dropping every few minutes in residential area",
-      desc: "Every voice call drops within 2-3 minutes of connecting. This has been happening for the past 4 days in my area. VoLTE is enabled but the issue persists."
+      desc: "Every voice call drops within 2-3 minutes of connecting. This has been happening for the past 4 days in my area. VoLTE is enabled but the issue persists.",
+      user_priority: "MEDIUM"
     },
     {
       title: "Service Outage",
       cat: "Service Outage",
       sub: "Complete network outage in entire building since morning",
-      desc: "No mobile signal or internet across our entire apartment complex since 8 AM today. Multiple residents are affected. This is impacting work-from-home connectivity urgently."
+      desc: "No mobile signal or internet across our entire apartment complex since 8 AM today. Multiple residents are affected. This is impacting work-from-home connectivity urgently.",
+      user_priority: "CRITICAL"
     }
   ];
 
   const applyPreset = (p) => {
     setFormData(prev => ({
       ...prev,
+      category: p.cat || "",
       subject: p.sub,
-      description: p.desc
+      description: p.desc,
+      user_priority: p.user_priority || "MEDIUM"
     }));
   };
 
@@ -102,7 +125,14 @@ export default function ComplaintForm({ onResult, user }) {
       setTimeout(() => updateStep(2), 1100);
       setTimeout(() => updateStep(3), 1500);
 
-      const res = await submitComplaint(formData.name, formData.email, formData.subject, formData.description);
+      const res = await submitComplaint(
+        formData.name,
+        formData.email,
+        formData.subject,
+        formData.description,
+        formData.category || null,
+        formData.user_priority || "MEDIUM"
+      );
 
       updateStep(4);
       updateStep(5);
@@ -117,7 +147,9 @@ export default function ComplaintForm({ onResult, user }) {
         name: user?.full_name || "",
         email: user?.email || "",
         subject: "",
-        description: ""
+        description: "",
+        category: "",
+        user_priority: "MEDIUM"
       });
     } catch (err) {
       setError(err.response?.data?.detail || "Pipeline processing failed. Please try again.");
@@ -206,6 +238,52 @@ export default function ComplaintForm({ onResult, user }) {
               disabled={loading}
               required
             />
+          </div>
+        </div>
+
+        <div className="form-section-wrapper" style={{ marginTop: '0.8rem' }}>
+          <div className="form-group">
+            <label>Service Domain / Category (Optional - Select from 11 SOPs)</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="form-input sop-select-dropdown"
+              disabled={loading}
+              style={{ background: '#ffffff', color: '#0f172a', fontWeight: 600, border: '1.5px solid #cbd5e1' }}
+            >
+              <option value="" style={{ background: '#ffffff', color: '#0f172a' }}>Auto-Detect Category via ML Engine</option>
+              {sopCategories.map((cat, idx) => (
+                <option key={idx} value={cat} style={{ background: '#ffffff', color: '#0f172a' }}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>User Impact / Priority Selection *</label>
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '4px' }}>
+              {["LOW", "MEDIUM", "HIGH", "CRITICAL"].map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, user_priority: p }))}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    fontSize: '0.82rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    border: formData.user_priority === p ? '2px solid #1e40af' : '1px solid #cbd5e1',
+                    background: formData.user_priority === p ? (p === 'CRITICAL' ? '#fef2f2' : (p === 'HIGH' ? '#fff7ed' : '#eff6ff')) : '#f8fafc',
+                    color: formData.user_priority === p ? (p === 'CRITICAL' ? '#991b1b' : (p === 'HIGH' ? '#c2410c' : '#1e40af')) : '#64748b'
+                  }}
+                >
+                  {p === 'CRITICAL' ? '🔴 CRITICAL' : (p === 'HIGH' ? '🟠 HIGH' : (p === 'MEDIUM' ? '🟡 MEDIUM' : '🟢 LOW'))}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

@@ -17,14 +17,11 @@ class MultiModelValidator:
     def __init__(self):
         self.groq_client = groq_client
         
-        # Validation models (Only using confirmed working Groq models)
+        # Validation models (Only using active working Groq models)
         self.validation_models = [
-            "llama-3.3-70b-versatile",          # Top quality 70B
-            "llama-3.1-8b-instant",             # Reliable 8B
-            "deepseek-r1-distill-qwen-32b",     # Reasoning specialist
-            "qwen-2.5-32b",                     # Balanced specialist
-            "llama-3.2-3b-preview",             # Lightweight fast
-            "llama-3.2-1b-preview"              # Ultra-fast
+            "qwen/qwen3.6-27b",
+            "groq/compound",
+            "groq/compound-mini"
         ]
         
         self.min_models = 1  # Minimum models that must respond
@@ -156,7 +153,7 @@ class MultiModelValidator:
             
             print(f"🤖 Validating with {model_name}...")
             
-            response = self.groq_client.client.chat.completions.create(
+            response = await self.groq_client.client.chat.completions.create(
                 messages=[
                     {
                         "role": "system",

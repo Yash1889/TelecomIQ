@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getAgentQueue, getComplaintDetail, validateSolution, sendResolution } from "../../api";
 import ThemeToggle from "../ThemeToggle";
+import ComplaintCard from "../ComplaintCard";
 import "../../styles/AgentModule.css";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -17,6 +18,8 @@ export default function AgentModule({ user, onNavigate }) {
     const [detailLoading, setDetailLoading] = useState(false);
     const [draftSolution, setDraftSolution] = useState("");
     const [draftSteps, setDraftSteps] = useState([]);
+    const [completedStepIndices, setCompletedStepIndices] = useState([]);
+    const [stepNotesMap, setStepNotesMap] = useState({});
     const [validationResult, setValidationResult] = useState(null);
     const [isValidating, setIsValidating] = useState(false);
     const [isSending, setIsSending] = useState(false);
@@ -26,6 +29,38 @@ export default function AgentModule({ user, onNavigate }) {
         critical: 0,
         avg_confidence: 0
     });
+
+    const getNextBestAction = () => {
+        if (!selectedComplaint) return "";
+        const total = draftSteps.length;
+        const completedCount = completedStepIndices.length;
+
+        if (total === 0) return "Add actionable troubleshooting steps to initiate resolution workflow.";
+
+        const notesValues = Object.values(stepNotesMap);
+        const hasAbnormalNote = notesValues.some(n =>
+            /abnormal|fault|error|fail|high loss|drop|red|loss|attenuation/i.test(n)
+        );
+
+        if (hasAbnormalNote) {
+            const isBilling = (selectedComplaint.category || '').includes('Billing');
+            if (isBilling) {
+                return "Diagnostic finding: Billing discrepancy or unauthorized fee verified. Next Best Action: Initiate transaction reversal workflow & issue billing credit note.";
+            }
+            return "Diagnostic finding: Optical / PON signal abnormal or out of threshold. Next Best Action: Escalate to NOC / Create Field Engineering Dispatch.";
+        }
+
+        if (completedCount === 0) {
+            const firstStep = draftSteps[0] || "Initiate initial diagnostic check";
+            return `Step 1 Pending: ${firstStep}. Verify current connection state or account ledger before proceeding.`;
+        } else if (completedCount < total) {
+            const nextIdx = draftSteps.findIndex((_, i) => !completedStepIndices.includes(i));
+            const nextStepName = draftSteps[nextIdx] || "Perform next diagnostic task";
+            return `Next Step (${nextIdx + 1}/${total}): ${nextStepName}. Proceed with operational verification.`;
+        } else {
+            return "All diagnostic & troubleshooting steps completed! Next Best Action: Approve resolution plan and send closure notification to subscriber.";
+        }
+    };
 
     useEffect(() => {
         if (user) {
@@ -81,6 +116,8 @@ export default function AgentModule({ user, onNavigate }) {
 
     const handleOpenComplaint = async (complaint) => {
         setDetailLoading(true);
+        setCompletedStepIndices([]);
+        setStepNotesMap({});
         try {
             const data = await getComplaintDetail(complaint.ticket_id, user.email);
             setSelectedComplaint(data.complaint);
@@ -440,45 +477,63 @@ export default function AgentModule({ user, onNavigate }) {
                                     </div>
                                 </div>
 
-                                {/* Section 4: AI Grounded Suggestion */}
-                                {(selectedComplaint.ai_solution || selectedComplaint.solution) && (
-                                    <div className="admin-modal-section" style={{ background: '#eff6ff', border: '1px solid #bfdbfe', padding: '1.25rem', borderRadius: '12px' }}>
-                                        <h3 style={{ color: '#1d4ed8', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span>🤖</span> AI Grounded Recommendation
-                                        </h3>
-                                        <p style={{ color: '#1e3a8a', fontSize: '0.92rem', lineHeight: '1.6', margin: 0 }}>
-                                            {selectedComplaint.ai_solution || selectedComplaint.solution}
-                                        </p>
-                                    </div>
-                                )}
-
-                                {/* Section 5: Agent Compose Resolution */}
+                                {/* Section 4: AI Grounded Recommendation & Full Triage */}
                                 <div className="admin-modal-section">
-                                    <h3>✍️ Support Agent Resolution Plan</h3>
+                                    <ComplaintCard data={selectedComplaint} />
+                                </div>
+
+                                {/* Section 5: Support Agent Resolution Plan & Dynamic Next-Best-Action Workflow */}
+                                <div className="admin-modal-section" style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #cbd5e1', paddingBottom: '0.75rem' }}>
+                                        <div>
+                                            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                ✍️ SUPPORT AGENT RESOLUTION PLAN
+                                            </h3>
+                                            <p style={{ margin: '4px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+                                                AI-generated from incident details + historical cases + telecom SOPs
+                                            </p>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: '1rem', textAlign: 'right' }}>
+                                            <div>
+                                                <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Diagnosis Focus</span>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1e40af' }}>{selectedComplaint.likely_cause || "Operational Verification"}</span>
+                                            </div>
+                                            <div>
+                                                <span style={{ fontSize: '0.72rem', color: '#64748b', textTransform: 'uppercase', fontWeight: 700, display: 'block' }}>Target SLA</span>
+                                                <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#059669' }}>12 Hours</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Resolution Plan Text Editor */}
+                                    <label style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', display: 'block', marginBottom: '6px' }}>
+                                        Official Resolution Response Draft
+                                    </label>
                                     <textarea
                                         className="solution-editor"
-                                        placeholder="Write a clear, descriptive technical resolution..."
+                                        placeholder="Write or refine the technical resolution message to be delivered to subscriber..."
                                         value={draftSolution}
                                         onChange={(e) => setDraftSolution(e.target.value)}
                                         style={{
                                             width: '100%',
-                                            minHeight: '110px',
-                                            padding: '12px 14px',
+                                            minHeight: '90px',
+                                            padding: '10px 12px',
                                             borderRadius: '8px',
                                             border: '1px solid #cbd5e1',
-                                            fontSize: '0.92rem',
+                                            fontSize: '0.9rem',
                                             fontFamily: 'inherit',
                                             resize: 'vertical',
-                                            marginBottom: '1rem',
-                                            outline: 'none'
+                                            marginBottom: '1.25rem',
+                                            outline: 'none',
+                                            background: '#ffffff'
                                         }}
                                     />
 
-                                    {/* Actionable steps */}
+                                    {/* Actionable Interactive Steps */}
                                     <div style={{ marginBottom: '1.25rem' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                                            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', margin: 0 }}>
-                                                Actionable Troubleshooting Steps
+                                            <h4 style={{ fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', color: '#475569', margin: 0 }}>
+                                                Interactive Troubleshooting Steps ({completedStepIndices.length}/{draftSteps.length} Completed)
                                             </h4>
                                             <button
                                                 onClick={() => setDraftSteps([...draftSteps, ""])}
@@ -488,7 +543,7 @@ export default function AgentModule({ user, onNavigate }) {
                                                     border: '1px solid #bfdbfe',
                                                     borderRadius: '6px',
                                                     padding: '4px 10px',
-                                                    fontSize: '0.8rem',
+                                                    fontSize: '0.78rem',
                                                     fontWeight: 600,
                                                     cursor: 'pointer'
                                                 }}
@@ -497,54 +552,125 @@ export default function AgentModule({ user, onNavigate }) {
                                             </button>
                                         </div>
 
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                            {draftSteps.map((step, idx) => (
-                                                <div key={idx} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                                                    <span style={{ color: '#1B4DFF', fontWeight: '700', width: '20px' }}>{idx + 1}.</span>
-                                                    <input
-                                                        type="text"
-                                                        value={step}
-                                                        onChange={(e) => {
-                                                            const newSteps = [...draftSteps];
-                                                            newSteps[idx] = e.target.value;
-                                                            setDraftSteps(newSteps);
-                                                        }}
-                                                        placeholder={`Step ${idx + 1}...`}
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                            {draftSteps.map((step, idx) => {
+                                                const isCompleted = completedStepIndices.includes(idx);
+                                                return (
+                                                    <div
+                                                        key={idx}
                                                         style={{
-                                                            flex: 1,
-                                                            background: '#ffffff',
-                                                            border: '1px solid #cbd5e1',
-                                                            borderRadius: '6px',
-                                                            padding: '8px 12px',
-                                                            fontSize: '0.88rem'
-                                                        }}
-                                                    />
-                                                    <button
-                                                        onClick={() => setDraftSteps(draftSteps.filter((_, i) => i !== idx))}
-                                                        style={{
-                                                            background: '#fef2f2',
-                                                            color: '#ef4444',
-                                                            border: '1px solid #fecaca',
-                                                            borderRadius: '6px',
-                                                            width: '32px',
-                                                            height: '32px',
-                                                            cursor: 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            fontWeight: 700
+                                                            background: isCompleted ? '#f0fdf4' : '#ffffff',
+                                                            border: isCompleted ? '1px solid #bbf7d0' : '1px solid #cbd5e1',
+                                                            borderRadius: '8px',
+                                                            padding: '10px 14px',
+                                                            transition: 'all 0.2s ease'
                                                         }}
                                                     >
-                                                        ✕
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            {draftSteps.length === 0 && (
-                                                <p style={{ fontSize: '0.82rem', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
-                                                    No manual steps added. Click "+ Add Step" if required.
-                                                </p>
-                                            )}
+                                                        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    if (isCompleted) {
+                                                                        setCompletedStepIndices(completedStepIndices.filter(i => i !== idx));
+                                                                    } else {
+                                                                        setCompletedStepIndices([...completedStepIndices, idx]);
+                                                                    }
+                                                                }}
+                                                                style={{
+                                                                    background: isCompleted ? '#16a34a' : '#ffffff',
+                                                                    color: isCompleted ? '#ffffff' : '#475569',
+                                                                    border: isCompleted ? 'none' : '1px solid #cbd5e1',
+                                                                    borderRadius: '6px',
+                                                                    padding: '4px 10px',
+                                                                    fontSize: '0.78rem',
+                                                                    fontWeight: 700,
+                                                                    cursor: 'pointer',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '4px'
+                                                                }}
+                                                            >
+                                                                {isCompleted ? '✓ Completed' : 'Mark Complete'}
+                                                            </button>
+
+                                                            <input
+                                                                type="text"
+                                                                value={step}
+                                                                onChange={(e) => {
+                                                                    const newSteps = [...draftSteps];
+                                                                    newSteps[idx] = e.target.value;
+                                                                    setDraftSteps(newSteps);
+                                                                }}
+                                                                placeholder={`Step ${idx + 1}...`}
+                                                                style={{
+                                                                    flex: 1,
+                                                                    background: 'transparent',
+                                                                    border: 'none',
+                                                                    fontSize: '0.9rem',
+                                                                    fontWeight: 600,
+                                                                    color: isCompleted ? '#166534' : '#0f172a',
+                                                                    textDecoration: isCompleted ? 'line-through' : 'none',
+                                                                    outline: 'none'
+                                                                }}
+                                                            />
+
+                                                            <button
+                                                                onClick={() => setDraftSteps(draftSteps.filter((_, i) => i !== idx))}
+                                                                style={{
+                                                                    background: 'transparent',
+                                                                    color: '#ef4444',
+                                                                    border: 'none',
+                                                                    cursor: 'pointer',
+                                                                    fontWeight: 700,
+                                                                    opacity: 0.6
+                                                                }}
+                                                                title="Remove Step"
+                                                            >
+                                                                ✕
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Optional Diagnostic Note / Finding Input */}
+                                                        <div style={{ marginTop: '8px', paddingLeft: '28px' }}>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Add Diagnostic Finding (e.g. Downstream level -28 dBm abnormal / ledger verified)..."
+                                                                value={stepNotesMap[idx] || ""}
+                                                                onChange={(e) => setStepNotesMap({ ...stepNotesMap, [idx]: e.target.value })}
+                                                                style={{
+                                                                    width: '100%',
+                                                                    padding: '4px 8px',
+                                                                    fontSize: '0.8rem',
+                                                                    borderRadius: '4px',
+                                                                    border: '1px dashed #cbd5e1',
+                                                                    background: '#ffffff',
+                                                                    color: '#334155'
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
+                                    </div>
+
+                                    {/* ⚡ DYNAMIC NEXT BEST ACTION CARD */}
+                                    <div style={{
+                                        background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                                        color: '#ffffff',
+                                        padding: '1.25rem',
+                                        borderRadius: '10px',
+                                        boxShadow: '0 4px 14px rgba(49, 46, 129, 0.25)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '6px' }}>
+                                            <span style={{ fontSize: '1rem' }}>⚡</span>
+                                            <span style={{ fontSize: '0.78rem', fontWeight: 800, letterSpacing: '0.05em', color: '#a5b4fc', textTransform: 'uppercase' }}>
+                                                DYNAMIC NEXT BEST ACTION (AI WORKFLOW ENGINE)
+                                            </span>
+                                        </div>
+                                        <p style={{ margin: 0, fontSize: '0.92rem', fontWeight: 600, lineHeight: 1.5, color: '#f8fafc' }}>
+                                            {getNextBestAction()}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
