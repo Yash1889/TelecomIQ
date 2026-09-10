@@ -16,14 +16,7 @@ import "./styles/ButtonReset.css";
 export default function App() {
   const [page, setPage] = useState("gateway");
   const [user, setUser] = useState(() => {
-    const saved = getStoredUser();
-    return saved || {
-      name: "TelecomIQ Operator",
-      full_name: "TelecomIQ Administrator",
-      email: "admin@telecomiq.com",
-      role: "Admin",
-      is_agent: true,
-    };
+    return getStoredUser() || null;
   });
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
@@ -37,6 +30,35 @@ export default function App() {
       setResult(null);
     }
   }, []);
+
+  const handleOpenAuth = (role = "Customer") => {
+    setAuthInitialRole(role);
+    setAuthModalOpen(true);
+  };
+
+  const handleRoleSelection = (selectedRole) => {
+    if (selectedRole === "Customer") {
+      if (user && user.role === "Customer") {
+        navigateTo("form");
+      } else {
+        handleOpenAuth("Customer");
+      }
+    } else if (selectedRole === "Support Agent") {
+      if (user && (user.role === "Support Agent" || user.is_agent)) {
+        navigateTo("agent-queue");
+      } else {
+        handleOpenAuth("Support Agent");
+      }
+    } else if (selectedRole === "Admin") {
+      if (user && user.role === "Admin") {
+        navigateTo("admin");
+      } else {
+        handleOpenAuth("Admin");
+      }
+    } else {
+      navigateTo(selectedRole);
+    }
+  };
 
   const handleLoginSuccess = (authenticatedUser) => {
     setUser(authenticatedUser);
@@ -58,11 +80,6 @@ export default function App() {
     navigateTo("gateway");
   };
 
-  const handleOpenAuth = (role = "Customer") => {
-    setAuthInitialRole(role);
-    setAuthModalOpen(true);
-  };
-
   const handleComplaintSubmit = async (data) => {
     setResult(data);
   };
@@ -72,7 +89,7 @@ export default function App() {
       return (
         <Gateway
           user={user}
-          onSelectRole={(role) => navigateTo(role)}
+          onSelectRole={handleRoleSelection}
           onExploreLanding={() => navigateTo("landing")}
           onOpenAuth={handleOpenAuth}
           onLogout={handleLogout}
@@ -162,7 +179,7 @@ export default function App() {
             )}
 
             <button className="btn-nav-ghost" onClick={() => navigateTo("gateway")}>
-              Switch Role
+              Switch Portal
             </button>
           </div>
         </header>

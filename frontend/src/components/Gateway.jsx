@@ -38,12 +38,12 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
               </span>
             </div>
           ) : (
-            <span style={{ color: "#94a3b8" }}>Guest Session</span>
+            <span style={{ color: "#94a3b8" }}>Guest / Public Session</span>
           )}
 
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={() => onOpenAuth()}
+              onClick={() => onOpenAuth("Customer")}
               style={{
                 background: "rgba(99, 102, 241, 0.15)",
                 border: "1px solid rgba(99, 102, 241, 0.3)",
@@ -56,7 +56,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
                 transition: "all 0.15s ease"
               }}
             >
-              {user ? "Switch / Log In" : "Sign In / Register"}
+              {user ? "Switch Account" : "Sign In / Register"}
             </button>
             {user && (
               <button
@@ -96,7 +96,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
 
           <h2 className="gateway-title">Welcome to TelecomIQ</h2>
           <p className="gateway-subtitle">
-            Select your role to access your dedicated workspace
+            Choose your role portal below to log in or register
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             className="gateway-role-btn customer-role"
             whileHover={{ scale: 1.02, x: 4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSelectRole("form")}
+            onClick={() => onSelectRole("Customer")}
           >
             <div className="role-icon-box customer-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -117,10 +117,10 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             </div>
             <div className="role-info">
               <div className="role-title-row">
-                <span className="role-name">Customer / Subscriber</span>
-                <span className="role-chip chip-blue">Public</span>
+                <span className="role-name">Login / Register as Customer</span>
+                <span className="role-chip chip-blue">Public Access</span>
               </div>
-              <span className="role-desc">File complaints &amp; get instant AI resolution</span>
+              <span className="role-desc">File complaints, track ticket progress &amp; get instant AI resolutions</span>
             </div>
             <div className="role-arrow">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -134,7 +134,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             className="gateway-role-btn agent-role"
             whileHover={{ scale: 1.02, x: 4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSelectRole("agent-queue")}
+            onClick={() => onSelectRole("Support Agent")}
           >
             <div className="role-icon-box agent-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -144,18 +144,14 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
                 <line x1="15" y1="1" x2="15" y2="4"></line>
                 <line x1="9" y1="20" x2="9" y2="23"></line>
                 <line x1="15" y1="20" x2="15" y2="23"></line>
-                <line x1="20" y1="9" x2="23" y2="9"></line>
-                <line x1="20" y1="14" x2="23" y2="14"></line>
-                <line x1="1" y1="9" x2="4" y2="9"></line>
-                <line x1="1" y1="14" x2="4" y2="14"></line>
               </svg>
             </div>
             <div className="role-info">
               <div className="role-title-row">
-                <span className="role-name">Support Agent</span>
-                <span className="role-chip chip-indigo">Operations</span>
+                <span className="role-name">Login as Support Agent</span>
+                <span className="role-chip chip-indigo">Fixed Credentials</span>
               </div>
-              <span className="role-desc">Review queue &amp; dispatch AI verified solutions</span>
+              <span className="role-desc">Manage queue, review multi-model consensus &amp; dispatch resolutions</span>
             </div>
             <div className="role-arrow">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -169,7 +165,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             className="gateway-role-btn admin-role"
             whileHover={{ scale: 1.02, x: 4 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => onSelectRole("admin")}
+            onClick={() => onSelectRole("Admin")}
           >
             <div className="role-icon-box admin-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -178,10 +174,10 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             </div>
             <div className="role-info">
               <div className="role-title-row">
-                <span className="role-name">Administrator</span>
-                <span className="role-chip chip-emerald">Executive / NOC</span>
+                <span className="role-name">Login as Administrator</span>
+                <span className="role-chip chip-emerald">Fixed Credentials</span>
               </div>
-              <span className="role-desc">Track live SLA, analytics, &amp; export audit logs</span>
+              <span className="role-desc">Monitor live SLA metrics, NOC alerts, sentiment trends &amp; audit logs</span>
             </div>
             <div className="role-arrow">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

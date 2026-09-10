@@ -19,14 +19,9 @@ def signup(data: SignupRequest, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(status_code=400, detail="An account with this email already exists. Please log in.")
     
-    # Determine role & agent status
-    role = data.role or "Customer"
-    if "admin" in normalized_email:
-        role = "Admin"
-    elif "agent" in normalized_email:
-        role = "Support Agent"
-    
-    is_agent = role in ["Admin", "Support Agent", "Agent"]
+    # Public registration from the portal is strictly for Customer / Subscriber accounts
+    role = "Customer"
+    is_agent = False
     
     # Create new user
     new_user = User(

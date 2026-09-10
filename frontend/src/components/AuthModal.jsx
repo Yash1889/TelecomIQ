@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { loginUser, signupUser } from "../api";
 import "../styles/AuthModal.css";
 
-export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = null }) {
+export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = "Customer" }) {
+  const [roleTarget, setRoleTarget] = useState(initialRole || "Customer");
   const [mode, setMode] = useState("login"); // "login" | "signup"
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -13,23 +14,43 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState(initialRole || "Customer");
+
+  useEffect(() => {
+    if (initialRole) {
+      setRoleTarget(initialRole);
+      // For Agent and Admin, always default to login mode
+      if (initialRole !== "Customer") {
+        setMode("login");
+      }
+    }
+  }, [initialRole, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleQuickLogin = async (demoEmail, demoPassword) => {
+  const isCustomer = roleTarget === "Customer";
+  const isAgent = roleTarget === "Support Agent" || roleTarget === "agent-queue";
+  const isAdmin = roleTarget === "Admin" || roleTarget === "admin";
+
+  // Fixed credentials data
+  const fixedCreds = isAgent
+    ? { email: "agent@telecomiq.com", pass: "agent123", label: "Fixed Agent Account" }
+    : isAdmin
+    ? { email: "admin@telecomiq.com", pass: "admin123", label: "Fixed Administrator Account" }
+    : { email: "customer@telecomiq.com", pass: "customer123", label: "Sample Customer Account" };
+
+  const handleAutoFillAndLogin = async (eEmail, ePass) => {
     setError("");
     setLoading(true);
-    setEmail(demoEmail);
-    setPassword(demoPassword);
+    setEmail(eEmail);
+    setPassword(ePass);
     try {
-      const res = await loginUser(demoEmail, demoPassword);
+      const res = await loginUser(eEmail, ePass);
       if (res?.user) {
         onSuccess(res.user);
         onClose();
       }
     } catch (err) {
-      setError(err?.response?.data?.detail || "Quick login failed. Please try again.");
+      setError(err?.response?.data?.detail || "Authentication failed. Please check credentials.");
     } finally {
       setLoading(false);
     }
@@ -48,12 +69,13 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
           onClose();
         }
       } else {
+        // Customer registration only
         const res = await signupUser({
           email,
           password,
           full_name: fullName,
           phone: phone || null,
-          role: role || "Customer",
+          role: "Customer",
         });
         if (res?.user) {
           onSuccess(res.user);
@@ -81,16 +103,38 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
         {/* Header */}
         <div className="auth-modal-header">
           <div className="auth-brand-badge">
-            <div className="auth-brand-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 17 12 22 22 17" />
-                <polyline points="2 12 12 17 22 12" />
-              </svg>
+            <div className={`auth-brand-icon ${isAgent ? "agent-icon" : isAdmin ? "admin-icon" : "customer-icon"}`}>
+              {isCustomer && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              )}
+              {isAgent && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                  <rect x="9" y="9" width="6" height="6"></rect>
+                  <line x1="9" y1="1" x2="9" y2="4"></line>
+                  <line x1="15" y1="1" x2="15" y2="4"></line>
+                </svg>
+              )}
+              {isAdmin && (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+              )}
             </div>
             <div className="auth-brand-text">
-              <h3>TelecomIQ Portal</h3>
-              <p>{mode === "login" ? "Sign in to access your workspace" : "Create a new TelecomIQ account"}</p>
+              <h3>
+                {isCustomer && "Customer / Subscriber Portal"}
+                {isAgent && "Support Agent Workspace"}
+                {isAdmin && "Administrator & NOC Portal"}
+              </h3>
+              <p>
+                {isCustomer && (mode === "login" ? "Sign in to report and track issues" : "Register a new subscriber account")}
+                {isAgent && "Sign in with operational credentials"}
+                {isAdmin && "Sign in with executive administrative clearance"}
+              </p>
             </div>
           </div>
           <button className="auth-close-btn" onClick={onClose} aria-label="Close">
@@ -101,62 +145,56 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
           </button>
         </div>
 
-        {/* Tabs Switcher */}
-        <div className="auth-tabs-nav">
+        {/* Security Notice for Agent / Admin */}
+        {!isCustomer && (
+          <div className={`auth-security-notice ${isAdmin ? "admin-notice" : "agent-notice"}`}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>
+              {isAgent && "Role is strictly restricted to authorized support operators with fixed credentials."}
+              {isAdmin && "Role is strictly restricted to executive staff with fixed administrative credentials."}
+            </span>
+          </div>
+        )}
+
+        {/* Fixed Credentials Quick Auto-Fill Box */}
+        <div className="auth-fixed-credentials-box">
+          <div className="auth-fixed-info">
+            <span className="auth-fixed-label">{fixedCreds.label}</span>
+            <span className="auth-fixed-value">{fixedCreds.email} / {fixedCreds.pass}</span>
+          </div>
           <button
             type="button"
-            className={`auth-tab-btn ${mode === "login" ? "active" : ""}`}
-            onClick={() => { setMode("login"); setError(""); }}
+            className="auth-autofill-btn"
+            onClick={() => handleAutoFillAndLogin(fixedCreds.email, fixedCreds.pass)}
+            disabled={loading}
           >
-            Sign In
-          </button>
-          <button
-            type="button"
-            className={`auth-tab-btn ${mode === "signup" ? "active" : ""}`}
-            onClick={() => { setMode("signup"); setError(""); }}
-          >
-            Create Account
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Auto-Fill &amp; Enter</span>
           </button>
         </div>
 
-        {/* Quick Demo Login Preset Bar */}
-        {mode === "login" && (
-          <div className="auth-demo-presets">
-            <div className="auth-demo-title">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-              <span>Instant Evaluator Demo Logins</span>
-            </div>
-            <div className="auth-demo-grid">
-              <button
-                type="button"
-                className="auth-demo-pill"
-                onClick={() => handleQuickLogin("admin@telecomiq.com", "admin123")}
-                disabled={loading}
-              >
-                👑 Admin
-                <span>admin123</span>
-              </button>
-              <button
-                type="button"
-                className="auth-demo-pill"
-                onClick={() => handleQuickLogin("agent@telecomiq.com", "agent123")}
-                disabled={loading}
-              >
-                🛡️ Agent
-                <span>agent123</span>
-              </button>
-              <button
-                type="button"
-                className="auth-demo-pill"
-                onClick={() => handleQuickLogin("customer@telecomiq.com", "customer123")}
-                disabled={loading}
-              >
-                👤 Subscriber
-                <span>customer123</span>
-              </button>
-            </div>
+        {/* Tabs Switcher: Only available for Customers */}
+        {isCustomer && (
+          <div className="auth-tabs-nav">
+            <button
+              type="button"
+              className={`auth-tab-btn ${mode === "login" ? "active" : ""}`}
+              onClick={() => { setMode("login"); setError(""); }}
+            >
+              Customer Log In
+            </button>
+            <button
+              type="button"
+              className={`auth-tab-btn ${mode === "signup" ? "active" : ""}`}
+              onClick={() => { setMode("signup"); setError(""); }}
+            >
+              New Customer Sign Up
+            </button>
           </div>
         )}
 
@@ -173,7 +211,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
             </div>
           )}
 
-          {mode === "signup" && (
+          {isCustomer && mode === "signup" && (
             <>
               <div className="auth-input-group">
                 <label className="auth-input-label">Full Name</label>
@@ -196,23 +234,20 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
               </div>
 
               <div className="auth-input-group">
-                <label className="auth-input-label">Role</label>
+                <label className="auth-input-label">Phone Number (Optional)</label>
                 <div className="auth-input-wrapper">
                   <div className="auth-input-icon">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                     </svg>
                   </div>
-                  <select
-                    className="auth-input-field auth-select-field"
-                    value={role}
-                    onChange={(e) => setRole(e.target.value)}
-                  >
-                    <option value="Customer">Customer / Subscriber</option>
-                    <option value="Support Agent">Support Agent (Operations)</option>
-                    <option value="Admin">Administrator (Executive / NOC)</option>
-                  </select>
+                  <input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    className="auth-input-field"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
                 </div>
               </div>
             </>
@@ -230,7 +265,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
               <input
                 type="email"
                 required
-                placeholder="name@telecomiq.com"
+                placeholder={isCustomer ? "subscriber@domain.com" : fixedCreds.email}
                 className="auth-input-field"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -258,12 +293,18 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
             </div>
           </div>
 
-          <button type="submit" className="auth-submit-btn" disabled={loading}>
+          <button
+            type="submit"
+            className={`auth-submit-btn ${isAgent ? "agent-btn" : isAdmin ? "admin-btn" : "customer-btn"}`}
+            disabled={loading}
+          >
             {loading ? (
               <span>Authenticating...</span>
             ) : (
               <>
-                <span>{mode === "login" ? "Sign In" : "Complete Registration"}</span>
+                <span>
+                  {mode === "login" ? `Log In as ${isCustomer ? "Customer" : isAgent ? "Support Agent" : "Administrator"}` : "Create Customer Account"}
+                </span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
@@ -272,31 +313,33 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = nu
             )}
           </button>
 
-          <div className="auth-footer-text">
-            {mode === "login" ? (
-              <>
-                Don't have an account?{" "}
-                <button
-                  type="button"
-                  className="auth-toggle-link"
-                  onClick={() => { setMode("signup"); setError(""); }}
-                >
-                  Sign Up
-                </button>
-              </>
-            ) : (
-              <>
-                Already registered?{" "}
-                <button
-                  type="button"
-                  className="auth-toggle-link"
-                  onClick={() => { setMode("login"); setError(""); }}
-                >
-                  Sign In
-                </button>
-              </>
-            )}
-          </div>
+          {isCustomer && (
+            <div className="auth-footer-text">
+              {mode === "login" ? (
+                <>
+                  New subscriber?{" "}
+                  <button
+                    type="button"
+                    className="auth-toggle-link"
+                    onClick={() => { setMode("signup"); setError(""); }}
+                  >
+                    Create Customer Account
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already registered?{" "}
+                  <button
+                    type="button"
+                    className="auth-toggle-link"
+                    onClick={() => { setMode("login"); setError(""); }}
+                  >
+                    Customer Sign In
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </form>
       </motion.div>
     </div>
