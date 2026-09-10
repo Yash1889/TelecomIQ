@@ -4,7 +4,6 @@ from app.agents.orchestrator import run_agent_pipeline
 from app.db.database import get_db, get_ist_time
 from app.db.models import Complaint
 from app.schemas.complaint import ComplaintRequest, ComplaintResponse, BulkDeleteRequest
-from app.services.email_service import email_service
 from app.services.auto_resolver import auto_resolver
 import datetime
 import random
@@ -123,27 +122,6 @@ async def handle_complaint(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/complaint/{ticket_id}/review")
-async def review_complaint(ticket_id: str, rating: int = Body(..., embed=True), feedback: str = Body(None, embed=True), db: Session = Depends(get_db)):
-    """
-    Allow users to review the AI solution
-    """
-    try:
-        complaint = db.query(Complaint).filter(Complaint.ticket_id == ticket_id).first()
-        if not complaint:
-            raise HTTPException(status_code=404, detail="Ticket not found")
-        
-        complaint.user_rating = rating
-        complaint.user_feedback = feedback
-        db.commit()
-        
-        return {"message": "Review submitted successfully", "ticket_id": ticket_id}
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
 @router.get("/complaints")
 def get_all_complaints(email: str = None, db: Session = Depends(get_db)):
     try:
@@ -197,21 +175,10 @@ async def update_complaint_status(
         
         db.commit()
         
-        # Send resolution email to user when marked as resolved
-        if is_resolved:
-            email_service.send_resolution_email(
-                name=complaint.name,
-                email=complaint.email,
-                ticket_id=ticket_id,
-                subject=complaint.subject,
-                solution=admin_solution or complaint.solution or "Your issue has been resolved by our team."
-            )
-        
         return {
             "message": "Status updated successfully", 
             "ticket_id": ticket_id, 
-            "is_resolved": is_resolved,
-            "email_sent": is_resolved
+            "is_resolved": is_resolved
         }
     except HTTPException:
         raise
@@ -290,58 +257,6 @@ async def bulk_delete_complaints(payload: BulkDeleteRequest, db: Session = Depen
     except Exception as e:
         db.rollback()
         print(f"❌ BULK DELETE ERROR: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/complaint/{ticket_id}/resolution-feedback")
-async def submit_resolution_feedback(
-    ticket_id: str,
-    is_actually_resolved: bool = Body(..., embed=True),
-    user_comment: str = Body("", embed=True),
-    db: Session = Depends(get_db)
-):
-    """
-    Allow users to provide feedback on whether their complaint was actually resolved.
-    Sends notification to admin if user reports it's not resolved.
-    """
-    try:
-        complaint = db.query(Complaint).filter(Complaint.ticket_id == ticket_id).first()
-        if not complaint:
-            raise HTTPException(status_code=404, detail="Ticket not found")
-        
-        # Store the feedback
-        complaint.user_resolution_feedback = is_actually_resolved
-        complaint.user_resolution_comment = user_comment
-        
-        # If user says it is resolved, mark the ticket as resolved
-        if is_actually_resolved:
-            complaint.is_resolved = True
-        else:
-            # If user says it is NOT resolved, ensure it is marked as open
-            complaint.is_resolved = False
-            
-        complaint.updated_at = get_ist_time()
-        db.commit()
-        
-        # Send email to admin with user's feedback
-        email_service.send_resolution_feedback_to_admin(
-            user_name=complaint.name,
-            user_email=complaint.email,
-            ticket_id=ticket_id,
-            subject=complaint.subject,
-            is_actually_resolved=is_actually_resolved,
-            user_comment=user_comment,
-            original_solution=complaint.solution or "No solution provided"
-        )
-        
-        return {
-            "message": "Feedback submitted successfully",
-            "ticket_id": ticket_id,
-            "is_actually_resolved": is_actually_resolved
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/analytics")

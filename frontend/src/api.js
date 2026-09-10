@@ -63,16 +63,6 @@ export const deleteAllComplaints = async (email = "") => {
   return response.data;
 };
 
-export const submitFeedback = async (feedbackData) => {
-  const response = await api.post("/feedback", feedbackData);
-  return response.data;
-};
-
-export const submitReview = async (ticketId, rating, feedback) => {
-  const response = await api.post(`/complaint/${ticketId}/review`, { rating, feedback });
-  return response.data;
-};
-
 export const updateComplaintStatus = async (ticketId, is_resolved, admin_solution = null) => {
   const body = { is_resolved };
   if (admin_solution) {
@@ -89,15 +79,6 @@ export const deleteComplaint = async (ticketId) => {
 
 export const bulkDeleteComplaints = async (ids) => {
   const response = await api.delete("/complaints/bulk", { data: { ids } });
-  return response.data;
-};
-
-
-export const submitResolutionFeedback = async (ticketId, isActuallyResolved, userComment = "") => {
-  const response = await api.post(`/complaint/${ticketId}/resolution-feedback`, {
-    is_actually_resolved: isActuallyResolved,
-    user_comment: userComment
-  });
   return response.data;
 };
 

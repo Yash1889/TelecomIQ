@@ -18,7 +18,6 @@ from app.db import models
 from app.db.seed import ensure_db_seeded
 from app.api.routes import router as complaint_router
 from app.api.chat import router as chat_router
-from app.routes.feedback import router as feedback_router
 from app.routes.agent_module import router as agent_router
 from app.routes.auth import router as auth_router
 
@@ -109,7 +108,6 @@ async def cross_origin_isolation_headers(request: Request, call_next):
 
 app.include_router(complaint_router)
 app.include_router(chat_router)
-app.include_router(feedback_router)
 app.include_router(agent_router)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(auth_router)

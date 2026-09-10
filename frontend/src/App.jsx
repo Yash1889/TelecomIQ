@@ -4,7 +4,6 @@ import Landing from "./components/Landing";
 import ComplaintForm from "./components/ComplaintForm";
 import ComplaintCard from "./components/ComplaintCard";
 import SideChatBot from "./components/SideChatBot";
-import Feedback from "./components/Feedback";
 import NotificationCenter from "./components/NotificationCenter";
 import AdminDashboard from "./components/AdminDashboard";
 import AgentModule from "./components/Agent/AgentModule";
@@ -31,7 +30,6 @@ export default function App() {
   const [authInitialRole, setAuthInitialRole] = useState("Customer");
   const [result, setResult] = useState(null);
   const [showChatbot, setShowChatbot] = useState(false);
-  const [feedbackOpen, setFeedbackOpen] = useState(false);
 
   const navigateTo = useCallback((newPage) => {
     setPage(newPage);
@@ -87,7 +85,6 @@ export default function App() {
         <Landing
           user={user}
           onStart={() => navigateTo("form")}
-          onFeedback={() => setFeedbackOpen(true)}
           onNavigate={navigateTo}
           onOpenAuth={handleOpenAuth}
           onLogout={handleLogout}
@@ -245,10 +242,6 @@ export default function App() {
         <span className="chatbot-badge"></span>
       </motion.button>
       <SideChatBot open={showChatbot} onClose={() => setShowChatbot(false)} />
-
-      {feedbackOpen && (
-        <Feedback onClose={() => setFeedbackOpen(false)} />
-      )}
     </>
   );
 }
