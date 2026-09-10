@@ -31,31 +31,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = "C
   const isAgent = roleTarget === "Support Agent" || roleTarget === "agent-queue";
   const isAdmin = roleTarget === "Admin" || roleTarget === "admin";
 
-  // Fixed credentials data
-  const fixedCreds = isAgent
-    ? { email: "agent@telecomiq.com", pass: "agent123", label: "Fixed Agent Account" }
-    : isAdmin
-    ? { email: "admin@telecomiq.com", pass: "admin123", label: "Fixed Administrator Account" }
-    : { email: "customer@telecomiq.com", pass: "customer123", label: "Sample Customer Account" };
-
-  const handleAutoFillAndLogin = async (eEmail, ePass) => {
-    setError("");
-    setLoading(true);
-    setEmail(eEmail);
-    setPassword(ePass);
-    try {
-      const res = await loginUser(eEmail, ePass);
-      if (res?.user) {
-        onSuccess(res.user);
-        onClose();
-      }
-    } catch (err) {
-      setError(err?.response?.data?.detail || "Authentication failed. Please check credentials.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -142,39 +117,6 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = "C
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
-          </button>
-        </div>
-
-        {/* Security Notice for Agent / Admin */}
-        {!isCustomer && (
-          <div className={`auth-security-notice ${isAdmin ? "admin-notice" : "agent-notice"}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-            <span>
-              {isAgent && "Role is strictly restricted to authorized support operators with fixed credentials."}
-              {isAdmin && "Role is strictly restricted to executive staff with fixed administrative credentials."}
-            </span>
-          </div>
-        )}
-
-        {/* Fixed Credentials Quick Auto-Fill Box */}
-        <div className="auth-fixed-credentials-box">
-          <div className="auth-fixed-info">
-            <span className="auth-fixed-label">{fixedCreds.label}</span>
-            <span className="auth-fixed-value">{fixedCreds.email} / {fixedCreds.pass}</span>
-          </div>
-          <button
-            type="button"
-            className="auth-autofill-btn"
-            onClick={() => handleAutoFillAndLogin(fixedCreds.email, fixedCreds.pass)}
-            disabled={loading}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-            <span>Auto-Fill &amp; Enter</span>
           </button>
         </div>
 
@@ -265,7 +207,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess, initialRole = "C
               <input
                 type="email"
                 required
-                placeholder={isCustomer ? "subscriber@domain.com" : fixedCreds.email}
+                placeholder={isCustomer ? "subscriber@domain.com" : isAgent ? "agent@telecomiq.com" : "admin@telecomiq.com"}
                 className="auth-input-field"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
