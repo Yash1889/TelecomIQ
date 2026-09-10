@@ -1,6 +1,5 @@
 import os
 from datetime import datetime, timedelta, timezone
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
@@ -12,110 +11,23 @@ def get_ist_time():
     return datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
 
 
-# ✅ Read the database URL from environment.
-# TURSO_DATABASE_URL is accepted as an alias so a Turso-only deployment works
-# without duplicating the same value under two names.
-DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("TURSO_DATABASE_URL") or ""
+# Database URL resolution (SQLite for Local and Vercel /tmp)
+DATABASE_URL = os.getenv("DATABASE_URL") or ""
 
-# A local SQLite file is fine for development, but on a host with an ephemeral
-# filesystem (Docker / serverless without a persistent volume) writes in the root directory
-# are read-only or wiped on restart.
-IS_HOSTED = bool(os.getenv("VERCEL") or os.getenv("ENVIRONMENT") == "production")
-TURSO_AUTH_TOKEN = None
-if not DATABASE_URL:
+if not DATABASE_URL or not DATABASE_URL.startswith("sqlite"):
     # On Vercel / serverless platforms, current directory is read-only. Use /tmp
     if os.getenv("VERCEL") or not os.access(".", os.W_OK):
         DATABASE_URL = "sqlite:////tmp/complaints.db"
     else:
         DATABASE_URL = "sqlite:///complaints.db"
-    print(f"[db] NOTICE: Defaulting to SQLite database '{DATABASE_URL}'.")
 
-# ✅ Handle Postgres URL conversion
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-# ✅ Handle MariaDB/MySQL (Aiven) URL conversion
-elif DATABASE_URL.startswith("mysql://"):
-    # Fix driver
-    if "pymysql" not in DATABASE_URL:
-        DATABASE_URL = DATABASE_URL.replace("mysql://", "mysql+pymysql://")
-
-    # Strip 'ssl-mode=REQUIRED' if present to avoid TypeError
-    if "ssl-mode=" in DATABASE_URL:
-        import re
-        DATABASE_URL = re.sub(r'[?&]ssl-mode=[^&]+', '', DATABASE_URL)
-
-# ✅ Handle Turso (libsql) URL conversion
-elif DATABASE_URL.startswith("libsql://"):
-    _parts = urlsplit(DATABASE_URL)
-    _params = dict(parse_qsl(_parts.query))
-
-    # The underlying libsql-experimental driver ignores an authToken carried in
-    # the query string and connects with an empty JWT (Turso answers 401). Pull
-    # it out here and hand it to the driver through connect_args instead.
-    TURSO_AUTH_TOKEN = _params.pop("authToken", None)
-
-    # sqlalchemy-libsql reads this flag to choose its transport: secure=true is
-    # https, anything else is plain http, which a TLS-only Turso host rejects.
-    _params["secure"] = "true"
-
-    DATABASE_URL = urlunsplit(
-        ("sqlite+libsql", _parts.netloc, _parts.path, urlencode(_params), "")
-    )
-
-    if not TURSO_AUTH_TOKEN:
-        print("[db] WARNING: Turso URL has no authToken — expect 401 Unauthorized.")
-
-    # sqlalchemy-libsql ships no Windows wheel, so a dev machine can't talk to
-    # Turso at all. Fall back to SQLite there rather than refusing to boot, but
-    # never on the deployed host, where that would silently lose every write.
-    try:
-        import sqlalchemy_libsql  # noqa: F401
-    except ImportError:
-        if IS_HOSTED:
-            raise RuntimeError(
-                "DATABASE_URL points at Turso but sqlalchemy-libsql is not installed. "
-                "Install it (>=0.2.0) so writes reach Turso instead of a disposable file."
-            )
-        if os.getenv("VERCEL") or not os.access(".", os.W_OK):
-            DATABASE_URL = "sqlite:////tmp/complaints.db"
-        else:
-            DATABASE_URL = "sqlite:///complaints.db"
-        TURSO_AUTH_TOKEN = None
-        print(
-            "[db] WARNING: sqlalchemy-libsql is unavailable (no Windows wheel). "
-            "Falling back to local SQLite 'complaints.db'. This machine is NOT "
-            "reading or writing Turso."
-        )
-
-# Covers plain sqlite:// and Turso's sqlite+libsql://, which share the pysqlite
-# dialect's connect arguments and pooling behaviour.
-IS_SQLITE_FAMILY = DATABASE_URL.startswith("sqlite")
-
-# ✅ Create engine with SSL support for Aiven if needed
-connect_args = {}
-if IS_SQLITE_FAMILY:
-    connect_args = {"check_same_thread": False}
-    if TURSO_AUTH_TOKEN:
-        # SQLAlchemy merges connect_args into the kwargs handed to the driver's
-        # connect(), which is the only place libsql-experimental reads the token.
-        connect_args["auth_token"] = TURSO_AUTH_TOKEN
-elif "aivencloud.com" in DATABASE_URL:
-    # Aiven requires SSL, but we must pass it via connect_args for pymysql
-    connect_args = {"ssl": {"ca": None}} # This triggers standard SSL check for Aiven
-
-# QueuePool sizing applies to the server-based backends; the sqlite dialects use
-# their own pool class and reject these arguments.
-pool_kwargs = {} if IS_SQLITE_FAMILY else {"pool_size": 10, "max_overflow": 20}
-
+# Create SQLite engine
 engine = create_engine(
     DATABASE_URL,
-    pool_pre_ping=True,
-    connect_args=connect_args,
-    **pool_kwargs
+    connect_args={"check_same_thread": False}
 )
 
-print(f"[db] Backend: {DATABASE_URL.split('://')[0]} @ {DATABASE_URL.split('@')[-1].split('?')[0]}")
+print(f"[db] Database initialized: {DATABASE_URL}")
 
 # ✅ Session
 SessionLocal = sessionmaker(

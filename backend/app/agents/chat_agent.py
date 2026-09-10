@@ -9,6 +9,7 @@ import asyncio
 # Import training data
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'Training_data'))
 try:
+    # pyrefly: ignore [missing-import]
     from training_data import CLASSIFICATION_EXAMPLES, SENTIMENT_EXAMPLES, RESPONSE_TEMPLATES
 except ImportError:
     CLASSIFICATION_EXAMPLES = ""
@@ -170,26 +171,17 @@ async def handle_chat_message(message: str) -> dict:
             except:
                 intent = "QUESTION"
 
-    # 🚀 TIER 4: AI PROCESSING (Language-Aware, Domain-Constrained via Groq)
+    # 🚀 TIER 4: AI PROCESSING (Language-Aware & Versatile via Groq)
     if "QUESTION" in intent:
-        # 🔍 TIER 3.5: RAG RETRIEVAL (Company Policies & SOPs)
+        # 🔍 TIER 3.5: RAG RETRIEVAL (Company Policies)
         policy_context = rag_engine.retrieve(clean_msg)
-        sop_snippets = policy_context.get("context", "")
         
-        system_persona = f"""You are the TelecomIQ Official AI Support Assistant.
-You are STRICTLY CONSTRAINED to the TelecomIQ platform, telecom services, network/broadband issues, call drops, billing disputes, SIM/eSIM, Wi-Fi routers, and telecom complaint resolution.
+        system_persona = f"""You are TelecomIQ AI Agent, a helpful, precise telecom assistant.
 
-STRICT DOMAIN GUARDRAIL RULES:
-1. If the user asks about ANY off-topic or general subject unrelated to telecom or TelecomIQ (for example: animals like dogs/cats/birds, general knowledge, movies, cooking/food, politics, sports, geography, non-telecom coding/trivia):
-   - Politely DECLINE to answer the off-topic question.
-   - Explain that you are exclusively specialized in TelecomIQ and telecom service complaint resolution.
-   - Invite them to ask about telecom issues (network signal, fiber broadband, bill charges, SIM activation, or ticket tracking).
-2. If the user asks about TelecomIQ features or telecom troubleshooting:
-   - Provide ONLY 2-3 concise, helpful bullet points (under 50 words total).
-   - Use retrieved SOP context if relevant:
-   {sop_snippets}
-3. Respond directly to the user in {user_language.upper()} language.
-4. DO NOT output thinking steps, mental refinements, draft notes, word count checks, or prompt instructions."""
+RULES:
+- Provide ONLY 2-3 short bullet points (under 50 words total).
+- Respond directly to the user in {user_language.upper()} language.
+- DO NOT output thinking steps, mental refinements, draft notes, word count checks, or prompt instructions."""
         
         answer_prompt = f"""{system_persona}
 
@@ -213,9 +205,9 @@ Response ({user_language.upper()} bullets only):"""
         except Exception as e:
             print(f"❌ AI Chat Error: {e}")
             fallback = {
-                'hinglish': "• Main TelecomIQ ka AI assistant hoon jo sirf telecom issues solve karta hai.\n• Kripya network, broadband, billing ya ticket status ke baare mein poochhein!",
-                'hindi': "• मैं टेलीकॉमआईक्यू का एआई सहायक हूँ जो केवल दूरसंचार समस्याओं में सहायता करता है।\n• कृपया नेटवर्क, ब्रॉडबैंड या बिलिंग से संबंधित प्रश्न पूछें!",
-                'english': "• I am TelecomIQ's AI assistant specialized exclusively in telecom complaint resolution.\n• Please ask about network, broadband, billing, or ticket status!"
+                'hinglish': "Maaf kijiye, main abhi busy hoon. Aap complaint form submit kar sakte hain!",
+                'hindi': "क्षमा करें, मैं अभी व्यस्त हूँ। कृपया शिकायत फॉर्म का उपयोग करें!",
+                'english': "Apologies, I'm currently experiencing high load. Please use the complaint form!"
             }
             return {"role": "agent", "type": "info", "response": fallback.get(user_language, fallback['english']), "language": user_language}
 
