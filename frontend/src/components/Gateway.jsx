@@ -14,17 +14,17 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        {/* Top Session Status Bar */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "12px 24px",
-          background: "rgba(15, 23, 42, 0.6)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-          fontSize: "0.82rem"
-        }}>
-          {user ? (
+        {/* Top Session Status Bar (Shown when user is logged in) */}
+        {user && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "12px 24px",
+            background: "rgba(15, 23, 42, 0.6)",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+            fontSize: "0.82rem"
+          }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <div style={{
                 width: "8px",
@@ -37,28 +37,24 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
                 Active: <strong style={{ color: "#f1f5f9" }}>{user.full_name || user.name || user.email}</strong> ({user.role})
               </span>
             </div>
-          ) : (
-            <span style={{ color: "#94a3b8" }}>Guest / Public Session</span>
-          )}
 
-          <div style={{ display: "flex", gap: "8px" }}>
-            <button
-              onClick={() => onOpenAuth("Customer")}
-              style={{
-                background: "rgba(99, 102, 241, 0.15)",
-                border: "1px solid rgba(99, 102, 241, 0.3)",
-                color: "#c7d2fe",
-                padding: "4px 10px",
-                borderRadius: "6px",
-                fontSize: "0.78rem",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "all 0.15s ease"
-              }}
-            >
-              {user ? "Switch Account" : "Sign In / Register"}
-            </button>
-            {user && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => onOpenAuth("Customer")}
+                style={{
+                  background: "rgba(99, 102, 241, 0.15)",
+                  border: "1px solid rgba(99, 102, 241, 0.3)",
+                  color: "#c7d2fe",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease"
+                }}
+              >
+                Switch Account
+              </button>
               <button
                 onClick={onLogout}
                 style={{
@@ -74,9 +70,9 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
               >
                 Logout
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Card Header */}
         <div className="gateway-header">
