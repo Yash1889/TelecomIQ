@@ -23,6 +23,19 @@ const api = axios.create({
   },
 });
 
+// Auto-attach JWT Bearer token if present
+api.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem("telecomiq_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // Ignore localStorage errors
+  }
+  return config;
+});
+
 const AUTH_TIMEOUT = 90000;
 
 export const submitComplaint = async (name, email, subject, description, category = null, user_priority = "MEDIUM") => {
@@ -130,6 +143,52 @@ export const getAuditLogs = async (agentEmail, params = {}) => {
   const queryParams = new URLSearchParams({ agent_email: agentEmail, ...params }).toString();
   const response = await api.get(`/agent/audit-logs?${queryParams}`);
   return response.data;
+};
+
+// ==========================================
+// Authentication APIs (Login, Signup, Me)
+// ==========================================
+
+export const loginUser = async (email, password) => {
+  const response = await api.post("/auth/login", { email, password });
+  if (response.data?.access_token) {
+    localStorage.setItem("telecomiq_token", response.data.access_token);
+    localStorage.setItem("telecomiq_user", JSON.stringify(response.data.user));
+  }
+  return response.data;
+};
+
+export const signupUser = async (userData) => {
+  const response = await api.post("/auth/signup", userData);
+  if (response.data?.access_token) {
+    localStorage.setItem("telecomiq_token", response.data.access_token);
+    localStorage.setItem("telecomiq_user", JSON.stringify(response.data.user));
+  }
+  return response.data;
+};
+
+export const getCurrentUserProfile = async (email = null) => {
+  const url = email ? `/auth/me?email=${encodeURIComponent(email)}` : "/auth/me";
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem("telecomiq_user");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const logoutUser = () => {
+  try {
+    localStorage.removeItem("telecomiq_token");
+    localStorage.removeItem("telecomiq_user");
+  } catch (e) {
+    // Ignore error
+  }
 };
 
 export default api;

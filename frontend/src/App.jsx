@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Gateway from "./components/Gateway";
 import Landing from "./components/Landing";
 import ComplaintForm from "./components/ComplaintForm";
@@ -8,17 +8,27 @@ import Feedback from "./components/Feedback";
 import NotificationCenter from "./components/NotificationCenter";
 import AdminDashboard from "./components/AdminDashboard";
 import AgentModule from "./components/Agent/AgentModule";
+import AuthModal from "./components/AuthModal";
+import { getStoredUser, logoutUser } from "./api";
 import { motion, AnimatePresence } from "framer-motion";
 import "./App.css";
 import "./styles/ButtonReset.css";
 
 export default function App() {
   const [page, setPage] = useState("gateway");
-  const [user] = useState({
-    name: "TelecomIQ Operator",
-    email: "admin@telecomiq.com",
-    role: "Admin"
+  const [user, setUser] = useState(() => {
+    const saved = getStoredUser();
+    return saved || {
+      name: "TelecomIQ Operator",
+      full_name: "TelecomIQ Administrator",
+      email: "admin@telecomiq.com",
+      role: "Admin",
+      is_agent: true,
+    };
   });
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authInitialRole, setAuthInitialRole] = useState("Customer");
   const [result, setResult] = useState(null);
   const [showChatbot, setShowChatbot] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -30,6 +40,31 @@ export default function App() {
     }
   }, []);
 
+  const handleLoginSuccess = (authenticatedUser) => {
+    setUser(authenticatedUser);
+    setAuthModalOpen(false);
+
+    // Smart role-based redirection
+    if (authenticatedUser.role === "Admin") {
+      navigateTo("admin");
+    } else if (authenticatedUser.role === "Support Agent" || authenticatedUser.is_agent) {
+      navigateTo("agent-queue");
+    } else {
+      navigateTo("form");
+    }
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setUser(null);
+    navigateTo("gateway");
+  };
+
+  const handleOpenAuth = (role = "Customer") => {
+    setAuthInitialRole(role);
+    setAuthModalOpen(true);
+  };
+
   const handleComplaintSubmit = async (data) => {
     setResult(data);
   };
@@ -38,8 +73,11 @@ export default function App() {
     if (page === "gateway") {
       return (
         <Gateway
+          user={user}
           onSelectRole={(role) => navigateTo(role)}
           onExploreLanding={() => navigateTo("landing")}
+          onOpenAuth={handleOpenAuth}
+          onLogout={handleLogout}
         />
       );
     }
@@ -51,6 +89,8 @@ export default function App() {
           onStart={() => navigateTo("form")}
           onFeedback={() => setFeedbackOpen(true)}
           onNavigate={navigateTo}
+          onOpenAuth={handleOpenAuth}
+          onLogout={handleLogout}
         />
       );
     }
@@ -58,8 +98,10 @@ export default function App() {
     if (page === "admin") {
       return (
         <AdminDashboard
-          user={user}
+          user={user || { name: "Admin", email: "admin@telecomiq.com", role: "Admin" }}
           onNavigate={navigateTo}
+          onOpenAuth={handleOpenAuth}
+          onLogout={handleLogout}
         />
       );
     }
@@ -67,8 +109,10 @@ export default function App() {
     if (page === "agent-queue") {
       return (
         <AgentModule
-          user={user}
+          user={user || { name: "Agent", email: "agent@telecomiq.com", role: "Support Agent" }}
           onNavigate={navigateTo}
+          onOpenAuth={handleOpenAuth}
+          onLogout={handleLogout}
         />
       );
     }
@@ -93,7 +137,33 @@ export default function App() {
             </div>
           </div>
 
-          <div className="header-right">
+          <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {user ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{
+                  fontSize: "0.82rem",
+                  color: "#cbd5e1",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
+                  border: "1px solid rgba(255, 255, 255, 0.08)"
+                }}>
+                  👤 {user.full_name || user.name || user.email} ({user.role || "User"})
+                </span>
+                <button
+                  className="btn-nav-ghost"
+                  onClick={handleLogout}
+                  style={{ color: "#fca5a5" }}
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <button className="btn-nav-primary" onClick={() => handleOpenAuth("Customer")}>
+                Sign In / Sign Up
+              </button>
+            )}
+
             <button className="btn-nav-ghost" onClick={() => navigateTo("gateway")}>
               Switch Role
             </button>
@@ -151,6 +221,13 @@ export default function App() {
       <NotificationCenter />
 
       {renderPage()}
+
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        onSuccess={handleLoginSuccess}
+        initialRole={authInitialRole}
+      />
 
       <motion.button
         className="chatbot-toggle"

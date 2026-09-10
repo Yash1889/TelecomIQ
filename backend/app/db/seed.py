@@ -1,13 +1,64 @@
 import os
 import json
 import pandas as pd
-from app.db.database import engine, SessionLocal
-from app.db.models import Complaint
+from app.db.database import engine, SessionLocal, get_ist_time
+from app.db.models import Complaint, User
+from app.services.auth_service import hash_password
 
 def ensure_db_seeded():
-    """Ensure SQLite database is populated with Kaggle dataset records on fresh deployment boot."""
+    """Ensure SQLite database is populated with default accounts and Kaggle dataset records."""
     db = SessionLocal()
     try:
+        # 1. Seed Default Demo Users if missing
+        demo_users = [
+            {
+                "email": "admin@telecomiq.com",
+                "full_name": "TelecomIQ Administrator",
+                "phone": "+91 98765 43210",
+                "role": "Admin",
+                "is_agent": True,
+                "password": "admin123"
+            },
+            {
+                "email": "agent@telecomiq.com",
+                "full_name": "Rohan Verma (Support Agent)",
+                "phone": "+91 98765 12345",
+                "role": "Support Agent",
+                "is_agent": True,
+                "password": "agent123"
+            },
+            {
+                "email": "customer@telecomiq.com",
+                "full_name": "Aarav Sharma",
+                "phone": "+91 98765 67890",
+                "role": "Customer",
+                "is_agent": False,
+                "password": "customer123"
+            }
+        ]
+
+        for u in demo_users:
+            user_exists = db.query(User).filter(User.email == u["email"]).first()
+            if not user_exists:
+                new_user = User(
+                    email=u["email"],
+                    full_name=u["full_name"],
+                    phone=u["phone"],
+                    role=u["role"],
+                    is_agent=u["is_agent"],
+                    hashed_password=hash_password(u["password"]),
+                    is_active=True,
+                    created_at=get_ist_time()
+                )
+                db.add(new_user)
+            elif not user_exists.hashed_password:
+                user_exists.hashed_password = hash_password(u["password"])
+                user_exists.role = u["role"]
+                user_exists.is_agent = u["is_agent"]
+        
+        db.commit()
+
+        # 2. Seed Kaggle Complaints if empty
         count = db.query(Complaint).count()
         if count > 0:
             print(f"[db] Database check passed: {count} complaints present in database.")

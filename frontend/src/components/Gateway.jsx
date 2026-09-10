@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import "../styles/Gateway.css";
 
-export default function Gateway({ onSelectRole, onExploreLanding }) {
+export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAuth, onLogout }) {
   return (
     <div className="gateway-page-wrapper">
       {/* Background ambient lighting */}
@@ -14,6 +14,70 @@ export default function Gateway({ onSelectRole, onExploreLanding }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
+        {/* Top Session Status Bar */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "12px 24px",
+          background: "rgba(15, 23, 42, 0.6)",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          fontSize: "0.82rem"
+        }}>
+          {user ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: "#10b981",
+                boxShadow: "0 0 8px #10b981"
+              }}></div>
+              <span style={{ color: "#94a3b8" }}>
+                Active: <strong style={{ color: "#f1f5f9" }}>{user.full_name || user.name || user.email}</strong> ({user.role})
+              </span>
+            </div>
+          ) : (
+            <span style={{ color: "#94a3b8" }}>Guest Session</span>
+          )}
+
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => onOpenAuth()}
+              style={{
+                background: "rgba(99, 102, 241, 0.15)",
+                border: "1px solid rgba(99, 102, 241, 0.3)",
+                color: "#c7d2fe",
+                padding: "4px 10px",
+                borderRadius: "6px",
+                fontSize: "0.78rem",
+                fontWeight: "600",
+                cursor: "pointer",
+                transition: "all 0.15s ease"
+              }}
+            >
+              {user ? "Switch / Log In" : "Sign In / Register"}
+            </button>
+            {user && (
+              <button
+                onClick={onLogout}
+                style={{
+                  background: "rgba(239, 68, 68, 0.1)",
+                  border: "1px solid rgba(239, 68, 68, 0.25)",
+                  color: "#fca5a5",
+                  padding: "4px 10px",
+                  borderRadius: "6px",
+                  fontSize: "0.78rem",
+                  fontWeight: "600",
+                  cursor: "pointer"
+                }}
+              >
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Card Header */}
         <div className="gateway-header">
           <div className="gateway-logo-badge">
