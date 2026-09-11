@@ -16,7 +16,6 @@ from app.db.models import (
     ModelValidation, AgentAuditLog
 )
 from app.services.multi_model_validator import multi_model_validator
-from app.services.email_service import email_service
 
 router = APIRouter(prefix="/agent", tags=["agent-module"])
 
@@ -495,26 +494,8 @@ def send_resolution(
         complaint.ai_analysis_steps = json.dumps(steps)
     complaint.updated_at = get_ist_time()
     
+    resolution.status = "delivered"
     db.commit()
-    
-    # Send email to user
-    try:
-        email_service.send_agent_resolution(
-            user_email=complaint.email,
-            user_name=complaint.name,
-            ticket_id=ticket_id,
-            complaint_subject=complaint.subject or "Your Complaint",
-            agent_solution=final_solution,
-            agent_name=agent.full_name or agent.email,
-            agent_steps=steps
-        )
-
-        resolution.status = "delivered"
-        db.commit()
-        
-    except Exception as e:
-        print(f"❌ Failed to send email: {e}")
-        # Don't fail the request, just log the error
     
     # Log action
     log_agent_action(

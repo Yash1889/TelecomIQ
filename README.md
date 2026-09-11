@@ -224,7 +224,7 @@ TelecomIQ/
 │   │   ├── knowledge_base/     # Telecom SOPs (telecom_kb.json, policies.json)
 │   │   ├── routes/             # Authentication & Support Agent module routes
 │   │   ├── schemas/            # Pydantic validation schemas
-│   │   ├── services/           # RAG retrieval engine, auto-resolver, email dispatcher
+│   │   ├── services/           # RAG retrieval engine, autonomous validator & auto-resolver
 │   │   └── main.py             # FastAPI app initialization
 │   ├── data/                   # Processed datasets (train/val/test splits)
 │   ├── models/                 # Saved model weights & TF-IDF vectorizer artifacts
