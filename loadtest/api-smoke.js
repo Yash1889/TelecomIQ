@@ -1,10 +1,4 @@
-// k6 load test for the Quickfix API.
-//
-// Run against the API, never against https://riteshkr.online — that host is the
-// Vercel-hosted static frontend. Vercel's Attack Challenge Mode starts serving
-// 403s (`x-vercel-mitigated: challenge`) after a handful of requests from one IP
-// and then drops connections outright, so any run pointed at it measures
-// Vercel's DDoS shield rather than this application.
+// k6 load test for the TelecomIQ API.
 //
 //   k6 run loadtest/api-smoke.js
 //   k6 run -e BASE_URL=http://localhost:8000 loadtest/api-smoke.js
@@ -12,7 +6,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE_URL = __ENV.BASE_URL || 'https://telecom-iq-pi.vercel.app';
+const BASE_URL = __ENV.BASE_URL || 'https://telecom-iq.vercel.app';
 
 export const options = {
   // Ramping profile rather than a flat wall of VUs, so the point at which
