@@ -16,6 +16,34 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
       >
 
 
+        {/* Transparent Active Session Tag (Shown when user is logged in) */}
+        {user && (
+          <div className="gateway-active-session-pill">
+            <div className="session-user-info">
+              <span className="session-online-dot"></span>
+              <span className="session-user-label">
+                Active: <strong className="session-user-name">{user.full_name || user.name || user.email}</strong>{" "}
+                <span className="session-user-role">({user.role || "User"})</span>
+              </span>
+            </div>
+
+            <div className="session-actions">
+              <button
+                className="session-action-btn switch-btn"
+                onClick={() => onOpenAuth("Customer")}
+              >
+                Switch Account
+              </button>
+              <button
+                className="session-action-btn logout-btn"
+                onClick={onLogout}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Card Header */}
         <div className="gateway-header">
           <div className="gateway-logo-badge">

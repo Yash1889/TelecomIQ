@@ -57,6 +57,94 @@
   text-align: center;
 }
 
+/* Transparent Active Session Tag */
+.gateway-active-session-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 1.25rem;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  border-radius: 12px;
+  font-size: 0.82rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.session-user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.session-online-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  flex-shrink: 0;
+}
+
+.session-user-label {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.session-user-name {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.session-user-role {
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.session-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.session-action-btn {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: transparent;
+}
+
+.session-action-btn.switch-btn {
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.session-action-btn.switch-btn:hover {
+  background: rgba(241, 245, 249, 0.8);
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.session-action-btn.logout-btn {
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+}
+
+.session-action-btn.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.08);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
 /* Card Header */
 .gateway-header {
   margin-bottom: 1.75rem;
