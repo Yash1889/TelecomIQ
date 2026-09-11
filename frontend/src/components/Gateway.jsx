@@ -20,21 +20,23 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "12px 24px",
-            background: "rgba(15, 23, 42, 0.6)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
-            fontSize: "0.82rem"
+            padding: "12px 22px",
+            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(248, 250, 252, 0.95))",
+            borderBottom: "1px solid #e2e8f0",
+            fontSize: "0.84rem",
+            borderTopLeftRadius: "18px",
+            borderTopRightRadius: "18px"
           }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <div style={{
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
                 background: "#10b981",
-                boxShadow: "0 0 8px #10b981"
+                boxShadow: "0 0 6px rgba(16, 185, 129, 0.5)"
               }}></div>
-              <span style={{ color: "#94a3b8" }}>
-                Active: <strong style={{ color: "#f1f5f9" }}>{user.full_name || user.name || user.email}</strong> ({user.role})
+              <span style={{ color: "#475569", fontWeight: 500 }}>
+                Active: <strong style={{ color: "#0f172a", fontWeight: 700 }}>{user.full_name || user.name || user.email}</strong> <span style={{ color: "#6366f1", fontWeight: 600 }}>({user.role || "User"})</span>
               </span>
             </div>
 
@@ -42,15 +44,16 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
               <button
                 onClick={() => onOpenAuth("Customer")}
                 style={{
-                  background: "rgba(99, 102, 241, 0.15)",
-                  border: "1px solid rgba(99, 102, 241, 0.3)",
-                  color: "#c7d2fe",
+                  background: "#ffffff",
+                  border: "1px solid #cbd5e1",
+                  color: "#475569",
                   padding: "4px 10px",
                   borderRadius: "6px",
                   fontSize: "0.78rem",
                   fontWeight: "600",
                   cursor: "pointer",
-                  transition: "all 0.15s ease"
+                  transition: "all 0.15s ease",
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
                 }}
               >
                 Switch Account
@@ -58,14 +61,15 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
               <button
                 onClick={onLogout}
                 style={{
-                  background: "rgba(239, 68, 68, 0.1)",
-                  border: "1px solid rgba(239, 68, 68, 0.25)",
-                  color: "#fca5a5",
+                  background: "rgba(239, 68, 68, 0.08)",
+                  border: "1px solid rgba(239, 68, 68, 0.2)",
+                  color: "#dc2626",
                   padding: "4px 10px",
                   borderRadius: "6px",
                   fontSize: "0.78rem",
                   fontWeight: "600",
-                  cursor: "pointer"
+                  cursor: "pointer",
+                  transition: "all 0.15s ease"
                 }}
               >
                 Logout
@@ -114,7 +118,6 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             <div className="role-info">
               <div className="role-title-row">
                 <span className="role-name">Login / Register as Customer</span>
-                <span className="role-chip chip-blue">Public Access</span>
               </div>
               <span className="role-desc">File complaints, track ticket progress &amp; get instant AI resolutions</span>
             </div>
@@ -145,7 +148,6 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             <div className="role-info">
               <div className="role-title-row">
                 <span className="role-name">Login as Support Agent</span>
-                <span className="role-chip chip-indigo">Fixed Credentials</span>
               </div>
               <span className="role-desc">Manage queue, review multi-model consensus &amp; dispatch resolutions</span>
             </div>
@@ -171,7 +173,6 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
             <div className="role-info">
               <div className="role-title-row">
                 <span className="role-name">Login as Administrator</span>
-                <span className="role-chip chip-emerald">Fixed Credentials</span>
               </div>
               <span className="role-desc">Monitor live SLA metrics, NOC alerts, sentiment trends &amp; audit logs</span>
             </div>
