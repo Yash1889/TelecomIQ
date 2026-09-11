@@ -1,17 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { submitComplaint } from "../api";
 import { showNotification } from "./NotificationCenter";
 import "../styles/ComplaintForm.css";
 
 export default function ComplaintForm({ onResult, user }) {
   const [formData, setFormData] = useState({
-    name: user?.full_name || "",
+    name: user?.full_name || user?.name || "",
     email: user?.email || "",
     subject: "",
     description: "",
     category: "",
     user_priority: "MEDIUM"
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: prev.name || user.full_name || user.name || "",
+        email: prev.email || user.email || ""
+      }));
+    }
+  }, [user]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [steps, setSteps] = useState([]);

@@ -190,7 +190,7 @@ function FeatureModal({ feature, onClose }) {
   );
 }
 
-export default function Landing({ user, onStart, onNavigate, onFeedback }) {
+export default function Landing({ user, onStart, onNavigate, onOpenAuth, onLogout, onFeedback }) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [activeModal, setActiveModal] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
@@ -416,7 +416,28 @@ export default function Landing({ user, onStart, onNavigate, onFeedback }) {
           </nav>
         </div>
 
-        <div className="header-right">
+        <div className="header-right" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          {user && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{
+                fontSize: "0.82rem",
+                color: "#cbd5e1",
+                background: "rgba(255, 255, 255, 0.05)",
+                padding: "4px 10px",
+                borderRadius: "20px",
+                border: "1px solid rgba(255, 255, 255, 0.08)"
+              }}>
+                👤 {user.full_name || user.name || user.email} ({user.role || "User"})
+              </span>
+              <button
+                className="btn-nav-ghost"
+                onClick={onLogout}
+                style={{ color: "#fca5a5" }}
+              >
+                Logout
+              </button>
+            </div>
+          )}
           <button className="btn-nav-ghost" onClick={() => onNavigate("agent-queue")}>
             Agent Queue
           </button>

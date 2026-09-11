@@ -37,19 +37,19 @@ export default function App() {
   };
 
   const handleRoleSelection = (selectedRole) => {
-    if (selectedRole === "Customer") {
+    if (selectedRole === "Customer" || selectedRole === "form") {
       if (user && user.role === "Customer") {
         navigateTo("form");
       } else {
         handleOpenAuth("Customer");
       }
-    } else if (selectedRole === "Support Agent") {
+    } else if (selectedRole === "Support Agent" || selectedRole === "agent-queue") {
       if (user && (user.role === "Support Agent" || user.is_agent)) {
         navigateTo("agent-queue");
       } else {
         handleOpenAuth("Support Agent");
       }
-    } else if (selectedRole === "Admin") {
+    } else if (selectedRole === "Admin" || selectedRole === "admin") {
       if (user && user.role === "Admin") {
         navigateTo("admin");
       } else {
@@ -101,8 +101,8 @@ export default function App() {
       return (
         <Landing
           user={user}
-          onStart={() => navigateTo("form")}
-          onNavigate={navigateTo}
+          onStart={() => handleRoleSelection("Customer")}
+          onNavigate={handleRoleSelection}
           onOpenAuth={handleOpenAuth}
           onLogout={handleLogout}
         />
