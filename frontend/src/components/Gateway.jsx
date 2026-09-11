@@ -14,69 +14,7 @@ export default function Gateway({ user, onSelectRole, onExploreLanding, onOpenAu
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.35, ease: "easeOut" }}
       >
-        {/* Top Session Status Bar (Shown when user is logged in) */}
-        {user && (
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "12px 22px",
-            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(248, 250, 252, 0.95))",
-            borderBottom: "1px solid #e2e8f0",
-            fontSize: "0.84rem",
-            borderTopLeftRadius: "18px",
-            borderTopRightRadius: "18px"
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <div style={{
-                width: "8px",
-                height: "8px",
-                borderRadius: "50%",
-                background: "#10b981",
-                boxShadow: "0 0 6px rgba(16, 185, 129, 0.5)"
-              }}></div>
-              <span style={{ color: "#475569", fontWeight: 500 }}>
-                Active: <strong style={{ color: "#0f172a", fontWeight: 700 }}>{user.full_name || user.name || user.email}</strong> <span style={{ color: "#6366f1", fontWeight: 600 }}>({user.role || "User"})</span>
-              </span>
-            </div>
 
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button
-                onClick={() => onOpenAuth("Customer")}
-                style={{
-                  background: "#ffffff",
-                  border: "1px solid #cbd5e1",
-                  color: "#475569",
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  fontSize: "0.78rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease",
-                  boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
-                }}
-              >
-                Switch Account
-              </button>
-              <button
-                onClick={onLogout}
-                style={{
-                  background: "rgba(239, 68, 68, 0.08)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  color: "#dc2626",
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  fontSize: "0.78rem",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  transition: "all 0.15s ease"
-                }}
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Card Header */}
         <div className="gateway-header">
